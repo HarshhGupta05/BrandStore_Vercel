@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, Fragment } from "react"
 import { useStore } from "@/contexts/store-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,89 +9,140 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Factory, Plus, Pencil, Trash2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { Factory, Plus, Trash2, PackageCheck, Eye, X } from "lucide-react"
 import type { ManufacturerOrder } from "@/contexts/store-context"
 
 export default function AdminManufacturerPage() {
-  const { products, manufacturerOrders, createManufacturerOrder, updateManufacturerOrder, deleteManufacturerOrder } =
+  const { products, manufacturerOrders, createManufacturerOrder, receiveManufacturerOrderItems, deleteManufacturerOrder } =
     useStore()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [editingOrder, setEditingOrder] = useState<ManufacturerOrder | null>(null)
 
-  const [formData, setFormData] = useState({
-    productId: "",
-    quantity: "",
-    cost: "",
-    orderDate: new Date().toISOString().split("T")[0],
-    expectedArrival: "",
-    status: "Ordered" as ManufacturerOrder["status"],
-  })
+  // Receive Modal State
+  const [isReceiveOpen, setIsReceiveOpen] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<ManufacturerOrder | null>(null)
+  const [receiveQuantities, setReceiveQuantities] = useState<{ [key: string]: string }>({})
+  const [receiveDates, setReceiveDates] = useState<{ [key: string]: string }>({}) // New state for per-item dates
+  const [expandedHistory, setExpandedHistory] = useState<string | null>(null) // productId for expanded history
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  // Create Form State
+  const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0])
+  const [expectedArrival, setExpectedArrival] = useState("")
+  const [orderItems, setOrderItems] = useState<{ productId: string; quantity: string; cost: string }[]>([
+    { productId: "", quantity: "", cost: "" }
+  ])
+
+  // --- Create Order Logic ---
+
+  const handleAddItem = () => {
+    setOrderItems([...orderItems, { productId: "", quantity: "", cost: "" }])
+  }
+
+  const handleRemoveItem = (index: number) => {
+    const newItems = [...orderItems]
+    newItems.splice(index, 1)
+    setOrderItems(newItems)
+  }
+
+  const handleItemChange = (index: number, field: string, value: string) => {
+    const newItems = [...orderItems]
+    newItems[index] = { ...newItems[index], [field]: value }
+    setOrderItems(newItems)
+  }
+
+  const handleSubmitCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    const product = products.find((p) => p.id === formData.productId)
-    if (!product) return
 
-    createManufacturerOrder({
-      productId: formData.productId,
-      productName: product.name,
-      quantity: Number.parseInt(formData.quantity),
-      quantityReceived: 0,
-      cost: Number.parseFloat(formData.cost),
-      orderDate: formData.orderDate,
-      expectedArrival: formData.expectedArrival,
-      status: formData.status,
+    // Validate items
+    const validItems = orderItems.filter(item => item.productId && Number(item.quantity) > 0 && Number(item.cost) >= 0)
+
+    if (validItems.length === 0) {
+      alert("Please add at least one valid product.")
+      return
+    }
+
+    const payloadItems = validItems.map(item => {
+      const product = products.find(p => p.id === item.productId)
+      return {
+        productId: item.productId,
+        productName: product?.name || "Unknown Product",
+        quantity: Number(item.quantity),
+        quantityReceived: 0,
+        cost: Number(item.cost)
+      }
     })
 
-    setFormData({
-      productId: "",
-      quantity: "",
-      cost: "",
-      orderDate: new Date().toISOString().split("T")[0],
-      expectedArrival: "",
+    await createManufacturerOrder({
+      items: payloadItems,
+      orderDate: orderDate,
+      expectedArrival: expectedArrival,
       status: "Ordered",
     })
+
+    // Reset Form
+    setOrderDate(new Date().toISOString().split("T")[0])
+    setExpectedArrival("")
+    setOrderItems([{ productId: "", quantity: "", cost: "" }])
     setIsCreateOpen(false)
   }
 
-  const handleEdit = (order: ManufacturerOrder) => {
-    setEditingOrder(order)
-    setIsEditOpen(true)
-  }
+  // --- Receive Items Logic ---
 
-  const handleUpdate = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingOrder) return
+  const openReceiveModal = (order: ManufacturerOrder) => {
+    setSelectedOrder(order)
+    setReceiveQuantities({}) // Reset inputs
 
-    const formElement = e.target as HTMLFormElement
-    const formData = new FormData(formElement)
-
-    updateManufacturerOrder(editingOrder.id, {
-      quantity: Number.parseInt(formData.get("quantity") as string),
-      quantityReceived: Number.parseInt(formData.get("quantityReceived") as string),
-      cost: Number.parseFloat(formData.get("cost") as string),
-      orderDate: formData.get("orderDate") as string,
-      expectedArrival: formData.get("expectedArrival") as string,
-      status: formData.get("status") as ManufacturerOrder["status"],
+    // Initialize dates for all items to today
+    const initialDates: { [key: string]: string } = {}
+    order.items.forEach(item => {
+      initialDates[item.productId] = new Date().toISOString().split("T")[0]
     })
+    setReceiveDates(initialDates)
 
-    setIsEditOpen(false)
-    setEditingOrder(null)
+    setExpandedHistory(null)
+    setIsReceiveOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this manufacturer order?")) {
-      deleteManufacturerOrder(id)
+  const handleReceiveChange = (productId: string, value: string) => {
+    setReceiveQuantities(prev => ({ ...prev, [productId]: value }))
+  }
+
+  const handleDateChange = (productId: string, value: string) => {
+    setReceiveDates(prev => ({ ...prev, [productId]: value }))
+  }
+
+  const handleConfirmReceive = async () => {
+    if (!selectedOrder) return
+
+    const itemsToReceive = Object.entries(receiveQuantities)
+      .map(([productId, qty]) => ({
+        productId,
+        receivedQuantity: Number(qty)
+      }))
+      .filter(item => item.receivedQuantity > 0)
+
+    if (itemsToReceive.length === 0) {
+      setIsReceiveOpen(false)
+      return
     }
+
+    await receiveManufacturerOrderItems(selectedOrder.orderId, itemsToReceive.map(i => ({
+      ...i,
+      receivedDate: receiveDates[i.productId] || new Date().toISOString().split("T")[0]
+    })))
+
+    setIsReceiveOpen(false)
+    setSelectedOrder(null)
   }
 
+
+  // --- Helper ---
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Received":
         return "bg-green-100 text-green-800 border-green-200"
-      case "In Transit":
+      case "Partially Received":
         return "bg-blue-100 text-blue-800 border-blue-200"
       case "Ordered":
         return "bg-yellow-100 text-yellow-800 border-yellow-200"
@@ -109,7 +158,7 @@ export default function AdminManufacturerPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="mb-2 text-3xl font-bold">Manufacturer Orders</h1>
-          <p className="text-muted-foreground">Create and manage orders from manufacturers to restock inventory</p>
+          <p className="text-muted-foreground">Manage purchase orders and inventory restocking</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
@@ -118,103 +167,115 @@ export default function AdminManufacturerPage() {
               Create Order
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle>Create Manufacturer Order</DialogTitle>
+              <DialogTitle>Create New Purchase Order</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="product">Product</Label>
-                <Select
-                  value={formData.productId}
-                  onValueChange={(value) => setFormData({ ...formData, productId: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select product" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.name} (Stock: {product.stock})
-                      </SelectItem>
+            <form onSubmit={handleSubmitCreate} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="orderDate">Order Date</Label>
+                  <Input
+                    id="orderDate"
+                    type="date"
+                    required
+                    value={orderDate}
+                    onChange={(e) => setOrderDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="expectedArrival">Expected Arrival</Label>
+                  <Input
+                    id="expectedArrival"
+                    type="date"
+                    required
+                    value={expectedArrival}
+                    onChange={(e) => setExpectedArrival(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Order Items</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
+                    <Plus className="h-4 w-4 mr-1" /> Add Item
+                  </Button>
+                </div>
+
+                <div className="border rounded-md overflow-hidden">
+                  <div className="grid grid-cols-12 gap-2 bg-muted p-2 text-xs font-medium text-muted-foreground border-b uppercase">
+                    <div className="col-span-5">Product</div>
+                    <div className="col-span-2">Qty</div>
+                    <div className="col-span-3">Cost/Unit</div>
+                    <div className="col-span-2">Action</div>
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto p-2 space-y-2">
+                    {orderItems.map((item, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-5">
+                          <Select
+                            value={item.productId}
+                            onValueChange={(val) => handleItemChange(index, "productId", val)}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Select Product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.map(p => (
+                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="col-span-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            placeholder="Qty"
+                            className="h-8"
+                            value={item.quantity}
+                            onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                          />
+                        </div>
+                        <div className="col-span-3">
+                          <div className="relative">
+                            <span className="absolute left-2 top-1.5 text-xs text-muted-foreground">₹</span>
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="h-8 pl-5"
+                              value={item.cost}
+                              onChange={(e) => handleItemChange(index, "cost", e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="col-span-2 flex justify-end">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveItem(index)}
+                            disabled={orderItems.length === 1}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  min="1"
-                  required
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="cost">Cost per Unit (₹)</Label>
-                <Input
-                  id="cost"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  value={formData.cost}
-                  onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="orderDate">Order Date</Label>
-                <Input
-                  id="orderDate"
-                  type="date"
-                  required
-                  value={formData.orderDate}
-                  onChange={(e) => setFormData({ ...formData, orderDate: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="expectedArrival">Expected Arrival</Label>
-                <Input
-                  id="expectedArrival"
-                  type="date"
-                  required
-                  value={formData.expectedArrival}
-                  onChange={(e) => setFormData({ ...formData, expectedArrival: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value: any) => setFormData({ ...formData, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ordered">Ordered</SelectItem>
-                    <SelectItem value="In Transit">In Transit</SelectItem>
-                    <SelectItem value="Received">Received</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
-                  Create Order
-                </Button>
+              <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancel
                 </Button>
-              </div>
+                <Button type="submit">Create Order</Button>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
@@ -224,8 +285,8 @@ export default function AdminManufacturerPage() {
         <Card>
           <CardContent className="p-12 text-center">
             <Factory className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-            <h2 className="mb-2 text-xl font-semibold">No manufacturer orders yet</h2>
-            <p className="text-muted-foreground">Create your first order to restock inventory from manufacturers</p>
+            <h2 className="mb-2 text-xl font-semibold">No orders found</h2>
+            <p className="text-muted-foreground">Get started by creating a new manufacturer order.</p>
           </CardContent>
         </Card>
       ) : (
@@ -233,7 +294,7 @@ export default function AdminManufacturerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Factory className="h-5 w-5" />
-              All Manufacturer Orders ({manufacturerOrders.length})
+              All Orders ({manufacturerOrders.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -242,27 +303,25 @@ export default function AdminManufacturerPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Order ID</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-right">Quantity Ordered</TableHead>
-                    <TableHead className="text-right">Quantity Received</TableHead>
-                    <TableHead className="text-right">Cost/Unit</TableHead>
-                    <TableHead className="text-right">Total Cost</TableHead>
                     <TableHead>Order Date</TableHead>
-                    <TableHead>Expected Arrival</TableHead>
+                    <TableHead className="text-center">Items</TableHead>
+                    <TableHead className="text-right">Total Cost</TableHead>
+                    <TableHead>Expected</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {manufacturerOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>{order.productName}</TableCell>
-                      <TableCell className="text-right">{order.quantity}</TableCell>
-                      <TableCell className="text-right">{order.quantityReceived || 0}</TableCell>
-                      <TableCell className="text-right">₹{order.cost.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">₹{(order.quantity * order.cost).toFixed(2)}</TableCell>
+                    <TableRow key={order.orderId}>
+                      <TableCell className="font-medium">{order.orderId}</TableCell>
                       <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-secondary text-xs">
+                          {order.items.length} Products
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">₹{order.totalCost.toFixed(2)}</TableCell>
                       <TableCell>{new Date(order.expectedArrival).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getStatusColor(order.status)}>
@@ -271,11 +330,13 @@ export default function AdminManufacturerPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(order)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(order.id)}>
-                            <Trash2 className="h-4 w-4" />
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
+                            onClick={() => openReceiveModal(order)}
+                          >
+                            <PackageCheck className="h-4 w-4 mr-1" /> Manage
                           </Button>
                         </div>
                       </TableCell>
@@ -288,114 +349,245 @@ export default function AdminManufacturerPage() {
         </Card>
       )}
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Manufacturer Order</DialogTitle>
+      {/* Receive / Manage Items Modal */}
+      <Dialog open={isReceiveOpen} onOpenChange={setIsReceiveOpen}>
+        <DialogContent className="max-w-6xl bg-background p-0 overflow-hidden flex flex-col max-h-[85vh] w-[95vw]">
+          <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
+            <DialogTitle className="text-xl">Manage Order: <span className="font-mono text-muted-foreground ml-2">{selectedOrder?.orderId}</span></DialogTitle>
           </DialogHeader>
-          {editingOrder && (
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div>
-                <Label>Product</Label>
-                <Input value={editingOrder.productName} disabled />
+
+          {selectedOrder && (
+            <>
+              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                {/* Order Summary Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-muted/30 p-4 rounded-xl border">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Order Date</div>
+                    <div className="font-mono text-lg font-medium">
+                      {selectedOrder.orderDate ? new Date(selectedOrder.orderDate).toLocaleDateString() : "-"}
+                    </div>
+                  </div>
+                  <div className="bg-muted/30 p-4 rounded-xl border">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total Cost</div>
+                    <div className="font-mono text-lg font-medium">₹{selectedOrder.totalCost.toFixed(2)}</div>
+                  </div>
+                  <div className="bg-muted/30 p-4 rounded-xl border flex flex-col justify-center items-start col-span-2 md:col-span-2">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Status</div>
+                    <Badge variant="outline" className={`
+                        px-3 py-1 text-sm font-medium border-0
+                        ${selectedOrder.status === 'Received' ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
+                        ${selectedOrder.status === 'Partially Received' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''}
+                        ${selectedOrder.status === 'Ordered' ? 'bg-slate-100 text-slate-700 hover:bg-slate-100' : ''}
+                        ${selectedOrder.status === 'Cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-100' : ''}
+                    `}>
+                      {selectedOrder.status}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Products Table Section (Desktop/Visible on md+) */}
+                <div className="hidden md:block">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    Received Items
+                    <Badge variant="secondary" className="text-xs font-normal">
+                      {selectedOrder.items.length} Items
+                    </Badge>
+                  </h3>
+                  <div className="border rounded-lg bg-background overflow-hidden shadow-sm overflow-x-auto">
+                    <Table className="table-fixed min-w-[700px]">
+                      <TableHeader className="bg-muted/50">
+                        <TableRow>
+                          <TableHead className="w-[35%] pl-4">Product Details</TableHead>
+                          <TableHead className="text-right w-[15%]">Ordered</TableHead>
+                          <TableHead className="text-right w-[15%]">Received</TableHead>
+                          <TableHead className="text-right w-[15%]">Remaining</TableHead>
+                          <TableHead className="w-[20%] text-center">Receive Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedOrder.items.map((item) => {
+                          const remaining = item.quantity - item.quantityReceived
+                          const isFullyReceived = remaining <= 0
+
+                          return (
+                            <Fragment key={item.productId}>
+                              <TableRow className={`group transition-colors ${isFullyReceived ? "bg-muted/40 hover:bg-muted/50" : "hover:bg-muted/5"}`}>
+                                <TableCell className="font-medium align-top py-4 pl-4">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-sm font-semibold text-foreground truncate max-w-[250px]" title={item.productName}>
+                                      {item.productName}
+                                    </span>
+                                    {item.deliveries && item.deliveries.length > 0 && (
+                                      <button
+                                        onClick={() => setExpandedHistory(expandedHistory === item.productId ? null : item.productId)}
+                                        className="text-xs text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 w-fit transition-colors"
+                                      >
+                                        <Eye className="h-3 w-3" />
+                                        {expandedHistory === item.productId ? "Hide History" : "View History"}
+                                      </button>
+                                    )}
+                                    {isFullyReceived && (
+                                      <Badge variant="secondary" className="w-fit bg-green-100 text-green-700 border-green-200 mt-1 text-[10px] px-2 py-0.5">
+                                        Completed
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right align-top py-4 font-mono text-muted-foreground">{item.quantity}</TableCell>
+                                <TableCell className="text-right align-top py-4 font-mono text-green-600">{item.quantityReceived}</TableCell>
+                                <TableCell className="text-right align-top py-4">
+                                  <span className={`font-mono font-bold ${remaining > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                                    {remaining}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="align-top py-4">
+                                  {!isFullyReceived && selectedOrder.status !== 'Cancelled' && (
+                                    <div className="space-y-2">
+                                      <div className="relative">
+                                        <Input
+                                          type="number"
+                                          min="0"
+                                          max={remaining}
+                                          placeholder="Qty"
+                                          className="h-9 w-full text-right bg-background border-input focus:ring-1 pr-8"
+                                          value={receiveQuantities[item.productId] || ""}
+                                          onChange={(e) => handleReceiveChange(item.productId, e.target.value)}
+                                        />
+                                        <span className="absolute right-3 top-2.5 text-xs text-muted-foreground pointer-events-none">
+                                          / {remaining}
+                                        </span>
+                                      </div>
+                                      <Input
+                                        type="date"
+                                        className="h-9 w-full bg-background border-input text-xs"
+                                        value={receiveDates[item.productId] || ""}
+                                        onChange={(e) => handleDateChange(item.productId, e.target.value)}
+                                      />
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                              {expandedHistory === item.productId && item.deliveries && (
+                                <TableRow className="bg-muted/10">
+                                  <TableCell colSpan={5} className="p-0">
+                                    <div className="p-4 bg-muted/20 border-y shadow-inner">
+                                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 pl-1">Delivery History</p>
+                                      <div className="space-y-2">
+                                        {item.deliveries.map((delivery, idx) => (
+                                          <div key={idx} className="flex items-center text-sm bg-background border rounded-md px-3 py-2">
+                                            <span className="font-mono font-medium w-8 text-right mr-3">{idx + 1}.</span>
+                                            <span className="font-medium mr-auto">Received <span className="text-green-600">{delivery.receivedQuantity}</span> units</span>
+                                            <span className="text-muted-foreground font-mono text-xs">
+                                              {new Date(delivery.receivedDate).toLocaleDateString()}
+                                            </span>
+                                            <span className="ml-4 text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">Admin</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </Fragment>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                </div>
+
+                {/* Mobile Card View (< 768px) */}
+                <div className="md:hidden space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    Received Items
+                    <Badge variant="secondary" className="text-xs font-normal">
+                      {selectedOrder.items.length} Items
+                    </Badge>
+                  </h3>
+                  {selectedOrder.items.map((item) => {
+                    const remaining = item.quantity - item.quantityReceived
+                    const isFullyReceived = remaining <= 0
+
+                    return (
+                      <div key={item.productId} className={`border rounded-lg p-4 space-y-4 ${isFullyReceived ? "bg-muted/40" : "bg-background"}`}>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-medium text-sm">{item.productName}</div>
+                            {isFullyReceived && <Badge variant="secondary" className="text-[10px] mt-1">Completed</Badge>}
+                          </div>
+                          <div className="text-right text-xs space-y-1">
+                            <div className="text-muted-foreground">Ordered: {item.quantity}</div>
+                            <div className="text-green-600">Received: {item.quantityReceived}</div>
+                            <div className="font-bold">Remaining: {remaining}</div>
+                          </div>
+                        </div>
+
+                        {!isFullyReceived && selectedOrder.status !== 'Cancelled' && (
+                          <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">Receive Qty</Label>
+                              <div className="relative">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max={remaining}
+                                  className="h-9 w-full bg-background"
+                                  value={receiveQuantities[item.productId] || ""}
+                                  onChange={(e) => handleReceiveChange(item.productId, e.target.value)}
+                                />
+                                <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">/{remaining}</span>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">Date</Label>
+                              <Input
+                                type="date"
+                                className="h-9 w-full bg-background"
+                                value={receiveDates[item.productId] || ""}
+                                onChange={(e) => handleDateChange(item.productId, e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="pt-2">
+                          <button
+                            onClick={() => setExpandedHistory(expandedHistory === item.productId ? null : item.productId)}
+                            className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                          >
+                            <Eye className="h-3 w-3" /> {expandedHistory === item.productId ? "Hide History" : "View History"}
+                          </button>
+                          {expandedHistory === item.productId && item.deliveries && (
+                            <div className="mt-2 space-y-2 bg-muted/20 p-2 rounded">
+                              {item.deliveries.map((delivery, idx) => (
+                                <div key={idx} className="flex justify-between text-xs border-b border-border/50 pb-1 last:border-0">
+                                  <span>{new Date(delivery.receivedDate).toLocaleDateString()}</span>
+                                  <span><strong>{delivery.receivedQuantity}</strong> units</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="edit-quantity">Quantity</Label>
-                <Input
-                  id="edit-quantity"
-                  name="quantity"
-                  type="number"
-                  min="1"
-                  required
-                  defaultValue={editingOrder.quantity}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-quantityReceived">Quantity Received</Label>
-                <Input
-                  id="edit-quantityReceived"
-                  name="quantityReceived"
-                  type="number"
-                  min="0"
-                  required
-                  defaultValue={editingOrder.quantityReceived || 0}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-cost">Cost per Unit (₹)</Label>
-                <Input
-                  id="edit-cost"
-                  name="cost"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  defaultValue={editingOrder.cost}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-orderDate">Order Date</Label>
-                <Input
-                  id="edit-orderDate"
-                  name="orderDate"
-                  type="date"
-                  required
-                  defaultValue={editingOrder.orderDate}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-expectedArrival">Expected Arrival</Label>
-                <Input
-                  id="edit-expectedArrival"
-                  name="expectedArrival"
-                  type="date"
-                  required
-                  defaultValue={editingOrder.expectedArrival}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="edit-status">Status</Label>
-                <Select name="status" defaultValue={editingOrder.status}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ordered">Ordered</SelectItem>
-                    <SelectItem value="In Transit">In Transit</SelectItem>
-                    <SelectItem value="Received">Received</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-                {editingOrder.status !== "Received" && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Note: Marking as "Received" will automatically increase product stock
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
-                  Update Order
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditOpen(false)
-                    setEditingOrder(null)
-                  }}
-                >
+              {/* Footer */}
+              <div className="p-6 border-t bg-background flex justify-end gap-3 flex-shrink-0">
+                <Button variant="outline" onClick={() => setIsReceiveOpen(false)}>
                   Cancel
                 </Button>
+                <Button
+                  onClick={handleConfirmReceive}
+                  disabled={Object.keys(receiveQuantities).length === 0}
+                >
+                  Update Received Items
+                </Button>
               </div>
-            </form>
+            </>
           )}
         </DialogContent>
       </Dialog>

@@ -20,6 +20,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/manufacturer-orders', require('./routes/manufacturerRoutes'));
+app.use('/api/vendor-invoices', require('./routes/vendorInvoiceRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');

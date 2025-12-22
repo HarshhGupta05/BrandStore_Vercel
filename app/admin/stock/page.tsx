@@ -75,13 +75,25 @@ export default function AdminStockPage() {
               const isModified = stockUpdates[product.id] !== undefined
 
               // Calculate stats from manufacturer orders
+              // Calculate stats from manufacturer orders
               const incomingStock = manufacturerOrders
-                .filter(o => o.productId === product.id && (o.status === 'Ordered' || o.status === 'In Transit'))
-                .reduce((sum, o) => sum + o.quantity, 0)
+                .filter(o => o.status !== "Received" && o.status !== "Cancelled")
+                .reduce((sum, order) => {
+                  const item = order.items.find(i => i.productId === product.id)
+                  if (item) {
+                    return sum + (item.quantity - item.quantityReceived)
+                  }
+                  return sum
+                }, 0)
 
               const totalReceived = manufacturerOrders
-                .filter(o => o.productId === product.id && o.status === 'Received')
-                .reduce((sum, o) => sum + (o.quantityReceived || 0), 0)
+                .reduce((sum, order) => {
+                  const item = order.items.find(i => i.productId === product.id)
+                  if (item) {
+                    return sum + item.quantityReceived
+                  }
+                  return sum
+                }, 0)
 
               return (
                 <div key={product.id} className="flex items-center justify-between rounded-lg border p-4">

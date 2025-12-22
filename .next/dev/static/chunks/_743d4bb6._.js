@@ -226,6 +226,7 @@ function StoreProvider({ children }) {
     const [products, setProducts] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dummy$2d$data$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["products"]);
     const [deliveryLogs, setDeliveryLogs] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [manufacturerOrders, setManufacturerOrders] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    const [vendorInvoices, setVendorInvoices] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "StoreProvider.useEffect": ()=>{
             const storedAuth = localStorage.getItem("auth_token");
@@ -358,13 +359,31 @@ function StoreProvider({ children }) {
     ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "StoreProvider.useEffect": ()=>{
-            if (manufacturerOrders.length > 0) {
-                localStorage.setItem("manufacturer_orders", JSON.stringify(manufacturerOrders));
-            }
+            const fetchManufacturerOrders = {
+                "StoreProvider.useEffect.fetchManufacturerOrders": async ()=>{
+                    try {
+                        const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/manufacturer-orders');
+                        // Map backend data to frontend interface
+                        const mappedOrders = data.map({
+                            "StoreProvider.useEffect.fetchManufacturerOrders.mappedOrders": (order)=>({
+                                    id: order._id,
+                                    orderId: order.orderId,
+                                    items: order.items,
+                                    orderDate: order.orderDate,
+                                    expectedArrival: order.expectedArrival,
+                                    status: order.status,
+                                    totalCost: order.totalCost
+                                })
+                        }["StoreProvider.useEffect.fetchManufacturerOrders.mappedOrders"]);
+                        setManufacturerOrders(mappedOrders);
+                    } catch (error) {
+                        console.error("Failed to fetch manufacturer orders", error);
+                    }
+                }
+            }["StoreProvider.useEffect.fetchManufacturerOrders"];
+            fetchManufacturerOrders();
         }
-    }["StoreProvider.useEffect"], [
-        manufacturerOrders
-    ]);
+    }["StoreProvider.useEffect"], []);
     const addToCart = (product, size)=>{
         setCart((prev)=>{
             const existing = prev.find((item)=>item.id === product.id && item.selectedSize === size);
@@ -467,33 +486,61 @@ function StoreProvider({ children }) {
     const getAllOrders = ()=>{
         return orders;
     };
-    const addProduct = (product)=>{
-        const newProduct = {
-            ...product,
-            id: `prod-${Date.now()}`
-        };
-        setProducts((prev)=>[
-                ...prev,
-                newProduct
-            ]);
+    // Products CRUD with Backend
+    const addProduct = async (product)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/products', product);
+            setProducts((prev)=>[
+                    ...prev,
+                    data
+                ]);
+        } catch (error) {
+            console.error("Failed to add product:", error);
+            // Fallback for demo if backend fails
+            const newProduct = {
+                ...product,
+                id: `prod-${Date.now()}`
+            };
+            setProducts((prev)=>[
+                    ...prev,
+                    newProduct
+                ]);
+        }
     };
-    const updateProduct = (id, updates)=>{
-        setProducts((prev)=>prev.map((product)=>product.id === id ? {
-                    ...product,
-                    ...updates
-                } : product));
+    const updateProduct = async (id, updates)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put(`/products/${id}`, updates);
+            setProducts((prev)=>prev.map((product)=>product.id === id ? data : product));
+        } catch (error) {
+            console.error("Failed to update product:", error);
+            // Fallback
+            setProducts((prev)=>prev.map((product)=>product.id === id ? {
+                        ...product,
+                        ...updates
+                    } : product));
+        }
     };
-    const deleteProduct = (id)=>{
-        setProducts((prev)=>prev.map((product)=>product.id === id ? {
-                    ...product,
-                    stock: 0
-                } : product));
+    const deleteProduct = async (id)=>{
+        try {
+            await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].delete(`/products/${id}`);
+            setProducts((prev)=>prev.map((product)=>product.id === id ? {
+                        ...product,
+                        stock: 0
+                    } : product)); // Soft delete in frontend to match previous logic, or remove completely if preferred. Let's stick to deactivating (stock 0) or removing. The User asked for permanent storage, deleting implies removal. But UI had "Deactivate". Let's assume soft delete for safety or hard delete for "Trash". 
+            // Actually, standard delete is better.
+            setProducts((prev)=>prev.filter((p)=>p.id !== id));
+        } catch (error) {
+            console.error("Failed to delete product:", error);
+            setProducts((prev)=>prev.map((product)=>product.id === id ? {
+                        ...product,
+                        stock: 0
+                    } : product));
+        }
     };
-    const updateStock = (productId, newStock)=>{
-        setProducts((prev)=>prev.map((product)=>product.id === productId ? {
-                    ...product,
-                    stock: newStock
-                } : product));
+    const updateStock = async (productId, newStock)=>{
+        await updateProduct(productId, {
+            stock: newStock
+        });
     };
     const updateOrderDeliveryStatus = (orderId, status, deliveryAgent)=>{
         setOrders((prev)=>{
@@ -599,44 +646,165 @@ function StoreProvider({ children }) {
         setUser(null);
     };
     const isAdmin = user?.role === "admin";
-    const createManufacturerOrder = (order)=>{
-        const newOrder = {
-            ...order,
-            id: `MFG-${Date.now()}`
-        };
-        setManufacturerOrders((prev)=>[
-                newOrder,
-                ...prev
-            ]);
+    const createManufacturerOrder = async (orderData)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/manufacturer-orders', orderData);
+            const newOrder = {
+                id: data._id,
+                orderId: data.orderId,
+                items: data.items,
+                orderDate: data.orderDate,
+                expectedArrival: data.expectedArrival,
+                status: data.status,
+                totalCost: data.totalCost
+            };
+            setManufacturerOrders((prev)=>[
+                    newOrder,
+                    ...prev
+                ]);
+        } catch (error) {
+            console.error("Failed to create manufacturer order", error);
+            throw error;
+        }
     };
-    const updateManufacturerOrder = (id, updates)=>{
-        setManufacturerOrders((prev)=>prev.map((order)=>{
-                if (order.id === id) {
-                    const updatedOrder = {
+    const receiveManufacturerOrderItems = async (orderId, items)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put(`/manufacturer-orders/${orderId}/receive`, {
+                receivedItems: items
+            });
+            // Update local state
+            setManufacturerOrders((prev)=>prev.map((order)=>order.orderId === orderId ? {
                         ...order,
-                        ...updates
-                    };
-                    if (updates.status === "Received" && order.status !== "Received") {
-                        setProducts((prevProducts)=>prevProducts.map((product)=>{
-                                if (product.id === order.productId) {
-                                    return {
-                                        ...product,
-                                        stock: product.stock + (updatedOrder.quantityReceived || updatedOrder.quantity)
-                                    };
-                                }
-                                return product;
-                            }));
-                    }
-                    return updatedOrder;
-                }
-                return order;
-            }));
+                        items: data.items,
+                        status: data.status
+                    } : order));
+            // Also re-fetch products to get updated stock
+            const { data: productsData } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/products');
+            setProducts(productsData);
+        } catch (error) {
+            console.error("Failed to receive items", error);
+            throw error;
+        }
     };
-    const deleteManufacturerOrder = (id)=>{
-        setManufacturerOrders((prev)=>prev.filter((order)=>order.id !== id));
+    const updateManufacturerOrderStatus = async (orderId, status)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put(`/manufacturer-orders/${orderId}/status`, {
+                status
+            });
+            setManufacturerOrders((prev)=>prev.map((order)=>order.orderId === orderId ? {
+                        ...order,
+                        status: data.status
+                    } : order));
+        } catch (error) {
+            console.error("Failed to update status", error);
+            throw error;
+        }
+    };
+    const deleteManufacturerOrder = async (orderId)=>{
+        try {
+            await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].delete(`/manufacturer-orders/${orderId}`);
+            setManufacturerOrders((prev)=>prev.filter((order)=>order.orderId !== orderId));
+        } catch (error) {
+            console.error("Failed to delete order", error);
+            throw error;
+        }
+    };
+    const [categories, setCategories] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "StoreProvider.useEffect": ()=>{
+            // ... existing token check ...
+            const fetchCategories = {
+                "StoreProvider.useEffect.fetchCategories": async ()=>{
+                    try {
+                        const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/categories');
+                        if (data.length === 0) {
+                            // Trigger seed
+                            await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/categories/seed');
+                            const seeded = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/categories');
+                            setCategories(seeded.data);
+                        } else {
+                            setCategories(data);
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch categories");
+                        // Fallback to dummy
+                        setCategories([
+                            {
+                                id: "cat-1",
+                                name: "Clothing",
+                                description: "Apparel"
+                            },
+                            {
+                                id: "cat-2",
+                                name: "Stationary",
+                                description: "Office"
+                            },
+                            {
+                                id: "cat-3",
+                                name: "Accessories",
+                                description: "Add-ons"
+                            }
+                        ]);
+                    }
+                }
+            }["StoreProvider.useEffect.fetchCategories"];
+            fetchCategories();
+        // ... rest of effects
+        }
+    }["StoreProvider.useEffect"], []);
+    // ... existing CRUD ...
+    const addCategory = async (category)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/categories', category);
+            setCategories((prev)=>[
+                    ...prev,
+                    data
+                ]);
+        } catch (e) {
+            console.error("Add category failed", e);
+            throw new Error(e.response?.data?.message || "Failed to add category");
+        }
+    };
+    const updateCategory = async (id, updates)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put(`/categories/${id}`, updates);
+            setCategories((prev)=>prev.map((c)=>c.id === id ? data : c));
+        } catch (error) {
+            console.error("Failed to update order status", error);
+            throw error;
+        }
+    };
+    const deleteCategory = async (id)=>{
+        try {
+            await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].delete(`/categories/${id}`);
+            setCategories((prev)=>prev.filter((c)=>c.id !== id));
+        } catch (e) {
+            throw new Error(e.response?.data?.message || "Failed to delete category");
+        }
+    };
+    const fetchVendorInvoices = async ()=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get('/vendor-invoices');
+            setVendorInvoices(data);
+        } catch (error) {
+            console.error("Failed to fetch vendor invoices", error);
+        }
+    };
+    const payVendorInvoice = async (invoiceId)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].put(`/vendor-invoices/${invoiceId}/pay`);
+            setVendorInvoices((prev)=>prev.map((inv)=>inv.invoiceId === invoiceId ? {
+                        ...inv,
+                        status: 'Paid'
+                    } : inv));
+        } catch (error) {
+            console.error("Failed to pay invoice", error);
+            throw error;
+        }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StoreContext.Provider, {
         value: {
+            // ... existing values
             cart,
             addToCart,
             removeFromCart,
@@ -660,17 +828,25 @@ function StoreProvider({ children }) {
             deliveryLogs,
             manufacturerOrders,
             createManufacturerOrder,
-            updateManufacturerOrder,
-            deleteManufacturerOrder
+            receiveManufacturerOrderItems,
+            updateManufacturerOrderStatus,
+            deleteManufacturerOrder,
+            categories,
+            addCategory,
+            updateCategory,
+            deleteCategory,
+            vendorInvoices,
+            fetchVendorInvoices,
+            payVendorInvoice
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/store-context.tsx",
-        lineNumber: 511,
+        lineNumber: 701,
         columnNumber: 5
     }, this);
 }
-_s(StoreProvider, "ou9lLwGKA3MQsHXIi+9By87wRdM=");
+_s(StoreProvider, "KMJGmeCE7VC5/dQIEm6VGqGmQk4=");
 _c = StoreProvider;
 function useStore() {
     _s1();
@@ -827,7 +1003,7 @@ function Navbar() {
         window.location.href = "/";
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
-        className: "border-b bg-background",
+        className: "sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "container mx-auto px-4 py-4",
             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {

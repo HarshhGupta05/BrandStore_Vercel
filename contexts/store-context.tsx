@@ -60,16 +60,52 @@ export interface DeliveryLog {
   deliveredAt: string
 }
 
-export interface ManufacturerOrder {
-  id: string
+// Updated Manufacturer Order Interface
+export interface ManufacturerOrderItem {
   productId: string
   productName: string
   quantity: number
   quantityReceived: number
   cost: number
+  deliveries?: {
+    receivedQuantity: number
+    receivedDate: string
+    receivedBy?: string
+  }[]
+}
+
+export interface ManufacturerOrder {
+  id: string // Frontend ID mapped from _id or orderId
+  orderId: string // Display ID (MFG-XXX)
+  items: ManufacturerOrderItem[]
+  receivingHistory?: {
+    productId: string
+    quantityReceived: number
+    receivedDate: string
+    costPerUnit: number
+  }[]
   orderDate: string
   expectedArrival: string
-  status: "Ordered" | "In Transit" | "Received" | "Cancelled"
+  status: "Ordered" | "In Transit" | "Partially Received" | "Received" | "Cancelled"
+  totalCost: number
+}
+
+export interface VendorInvoice {
+  _id: string
+  invoiceId: string
+  manufacturerOrderId: string
+  vendorName: string
+  items: {
+    productId: string
+    productName: string
+    quantity: number
+    costPerUnit: number
+    total: number
+  }[]
+  totalAmount: number
+  invoiceDate: string
+  status: "Pending" | "Paid"
+  createdAt: string
 }
 
 interface StoreContextType {
@@ -96,13 +132,18 @@ interface StoreContextType {
   updateOrderDeliveryStatus: (orderId: string, status: Order["deliveryStatus"], deliveryAgent?: string) => void
   deliveryLogs: DeliveryLog[]
   manufacturerOrders: ManufacturerOrder[]
-  createManufacturerOrder: (order: Omit<ManufacturerOrder, "id">) => void
-  updateManufacturerOrder: (id: string, updates: Partial<ManufacturerOrder>) => void
-  deleteManufacturerOrder: (id: string) => void
+  createManufacturerOrder: (items: any[], expectedDate: string, vendorName: string) => Promise<void>
+  receiveManufacturerOrderItems: (orderId: string, items: { productId: string, receivedQuantity: number, receivedDate?: string }[]) => Promise<void>
+  updateManufacturerOrderStatus: (orderId: string, status: string) => Promise<void>
+  deleteManufacturerOrder: (orderId: string) => Promise<void>
   categories: { id: string, name: string, description?: string }[]
   addCategory: (category: { name: string, description: string }) => Promise<void>
   updateCategory: (id: string, updates: { name?: string, description?: string }) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
+
+  vendorInvoices: VendorInvoice[]
+  fetchVendorInvoices: () => Promise<void>
+  payVendorInvoice: (invoiceId: string) => Promise<void>
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
@@ -117,6 +158,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts)
   const [deliveryLogs, setDeliveryLogs] = useState<DeliveryLog[]>([])
   const [manufacturerOrders, setManufacturerOrders] = useState<ManufacturerOrder[]>([])
+  const [vendorInvoices, setVendorInvoices] = useState<VendorInvoice[]>([])
 
   useEffect(() => {
     const storedAuth = localStorage.getItem("auth_token")
@@ -230,10 +272,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [deliveryLogs])
 
   useEffect(() => {
-    if (manufacturerOrders.length > 0) {
-      localStorage.setItem("manufacturer_orders", JSON.stringify(manufacturerOrders))
+    const fetchManufacturerOrders = async () => {
+      try {
+        const { data } = await api.get('/manufacturer-orders')
+        // Map backend data to frontend interface
+        const mappedOrders: ManufacturerOrder[] = data.map((order: any) => ({
+          id: order._id,
+          orderId: order.orderId,
+          items: order.items,
+          orderDate: order.orderDate,
+          expectedArrival: order.expectedArrival,
+          status: order.status,
+          totalCost: order.totalCost
+        }))
+        setManufacturerOrders(mappedOrders)
+      } catch (error) {
+        console.error("Failed to fetch manufacturer orders", error)
+      }
     }
-  }, [manufacturerOrders])
+    fetchManufacturerOrders()
+  }, [])
 
   const addToCart = (product: Product, size?: string) => {
     setCart((prev) => {
@@ -492,43 +550,68 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = user?.role === "admin"
 
-  const createManufacturerOrder = (order: Omit<ManufacturerOrder, "id">) => {
-    const newOrder: ManufacturerOrder = {
-      ...order,
-      id: `MFG-${Date.now()}`,
+  const createManufacturerOrder = async (orderData: any) => {
+    try {
+      const { data } = await api.post('/manufacturer-orders', orderData)
+      const newOrder: ManufacturerOrder = {
+        id: data._id,
+        orderId: data.orderId,
+        items: data.items,
+        orderDate: data.orderDate,
+        expectedArrival: data.expectedArrival,
+        status: data.status,
+        totalCost: data.totalCost
+      }
+      setManufacturerOrders((prev) => [newOrder, ...prev])
+    } catch (error) {
+      console.error("Failed to create manufacturer order", error)
+      throw error
     }
-    setManufacturerOrders((prev) => [newOrder, ...prev])
   }
 
-  const updateManufacturerOrder = (id: string, updates: Partial<ManufacturerOrder>) => {
-    setManufacturerOrders((prev) =>
-      prev.map((order) => {
-        if (order.id === id) {
-          const updatedOrder = { ...order, ...updates }
+  const receiveManufacturerOrderItems = async (orderId: string, items: { productId: string, receivedQuantity: number, receivedDate?: string }[]) => {
+    try {
+      const { data } = await api.put(`/manufacturer-orders/${orderId}/receive`, { receivedItems: items })
 
-          if (updates.status === "Received" && order.status !== "Received") {
-            setProducts((prevProducts) =>
-              prevProducts.map((product) => {
-                if (product.id === order.productId) {
-                  return {
-                    ...product,
-                    stock: product.stock + (updatedOrder.quantityReceived || updatedOrder.quantity),
-                  }
-                }
-                return product
-              }),
-            )
-          }
+      // Update local state
+      setManufacturerOrders((prev) => prev.map(order =>
+        order.orderId === orderId ? {
+          ...order,
+          items: data.items,
+          status: data.status
+        } : order
+      ))
 
-          return updatedOrder
-        }
-        return order
-      }),
-    )
+      // Also re-fetch products to get updated stock
+      const { data: productsData } = await api.get('/products')
+      setProducts(productsData)
+
+    } catch (error) {
+      console.error("Failed to receive items", error)
+      throw error
+    }
   }
 
-  const deleteManufacturerOrder = (id: string) => {
-    setManufacturerOrders((prev) => prev.filter((order) => order.id !== id))
+  const updateManufacturerOrderStatus = async (orderId: string, status: string) => {
+    try {
+      const { data } = await api.put(`/manufacturer-orders/${orderId}/status`, { status })
+      setManufacturerOrders((prev) => prev.map(order =>
+        order.orderId === orderId ? { ...order, status: data.status } : order
+      ))
+    } catch (error) {
+      console.error("Failed to update status", error)
+      throw error
+    }
+  }
+
+  const deleteManufacturerOrder = async (orderId: string) => {
+    try {
+      await api.delete(`/manufacturer-orders/${orderId}`)
+      setManufacturerOrders((prev) => prev.filter(order => order.orderId !== orderId))
+    } catch (error) {
+      console.error("Failed to delete order", error)
+      throw error
+    }
   }
 
 
@@ -578,8 +661,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.put(`/categories/${id}`, updates)
       setCategories(prev => prev.map(c => c.id === id ? data : c))
-    } catch (e: any) {
-      throw new Error(e.response?.data?.message || "Failed to update category")
+    } catch (error) {
+      console.error("Failed to update order status", error)
+      throw error
     }
   }
 
@@ -589,6 +673,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setCategories(prev => prev.filter(c => c.id !== id))
     } catch (e: any) {
       throw new Error(e.response?.data?.message || "Failed to delete category")
+    }
+  }
+
+  const fetchVendorInvoices = async () => {
+    try {
+      const { data } = await api.get('/vendor-invoices')
+      setVendorInvoices(data)
+    } catch (error) {
+      console.error("Failed to fetch vendor invoices", error)
+    }
+  }
+
+  const payVendorInvoice = async (invoiceId: string) => {
+    try {
+      const { data } = await api.put(`/vendor-invoices/${invoiceId}/pay`)
+      setVendorInvoices((prev) => prev.map(inv =>
+        inv.invoiceId === invoiceId ? { ...inv, status: 'Paid' } : inv
+      ))
+    } catch (error) {
+      console.error("Failed to pay invoice", error)
+      throw error
     }
   }
 
@@ -619,12 +724,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         deliveryLogs,
         manufacturerOrders,
         createManufacturerOrder,
-        updateManufacturerOrder,
+        receiveManufacturerOrderItems, // Expose new method
+        updateManufacturerOrderStatus, // Expose new method
         deleteManufacturerOrder,
         categories,
         addCategory,
         updateCategory,
-        deleteCategory
+        deleteCategory,
+
+        vendorInvoices,
+        fetchVendorInvoices,
+        payVendorInvoice
       }}
     >
       {children}
