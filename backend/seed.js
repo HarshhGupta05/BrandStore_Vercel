@@ -6,7 +6,7 @@ const Order = require('./models/Order');
 const connectDB = require('./config/db');
 
 dotenv.config();
-connectDB();
+
 
 const products = [
     {
@@ -106,6 +106,7 @@ const products = [
 
 const importData = async () => {
     try {
+        await connectDB();
         await Order.deleteMany();
         await Product.deleteMany();
         await User.deleteMany();

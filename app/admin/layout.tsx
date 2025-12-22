@@ -15,16 +15,22 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, isAdmin } = useStore()
+  const { user, isAdmin, isLoading } = useStore()
   const router = useRouter()
 
   useEffect(() => {
-    if (!user) {
-      router.push("/login")
-    } else if (!isAdmin) {
-      router.push("/")
+    if (!isLoading) {
+      if (!user) {
+        router.push("/login")
+      } else if (!isAdmin) {
+        router.push("/")
+      }
     }
-  }, [user, isAdmin, router])
+  }, [user, isAdmin, router, isLoading])
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>
+  }
 
   if (!user) {
     return null

@@ -56,4 +56,30 @@ router.get('/:id', protect, async (req, res) => {
     }
 });
 
+router.put('/:id/cancel', protect, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (order) {
+            // Check if user owns the order or is admin
+            if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+                return res.status(401).json({ message: 'Not authorized to cancel this order' });
+            }
+
+            if (order.isDelivered) {
+                return res.status(400).json({ message: 'Cannot cancel delivered order' });
+            }
+
+            order.status = 'Cancelled';
+            const updatedOrder = await order.save();
+            res.json(updatedOrder);
+        } else {
+            res.status(404).json({ message: 'Order not found' });
+        }
+    } catch (error) {
+        console.error("Error cancelling order:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 module.exports = router;

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useStore } from "@/contexts/store-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation"
 import { ShoppingBag, Package, CreditCard, Banknote, CheckCircle2 } from "lucide-react"
 
 export default function CheckoutPage() {
-  const { cart, createOrder, user, getCartTotal } = useStore()
+  const { cart, createOrder, user, getCartTotal, isLoading } = useStore()
   const router = useRouter()
 
   const [formData, setFormData] = useState({
@@ -27,13 +27,21 @@ export default function CheckoutPage() {
 
   const total = getCartTotal()
 
-  if (!user) {
-    router.push("/login?redirect=/checkout")
-    return null
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.push("/login?redirect=/checkout")
+      } else if (cart.length === 0) {
+        router.push("/cart")
+      }
+    }
+  }, [isLoading, user, cart, router])
+
+  if (isLoading) {
+    return <div className="flex h-[50vh] items-center justify-center">Loading...</div>
   }
 
-  if (cart.length === 0) {
-    router.push("/cart")
+  if (!user || cart.length === 0) {
     return null
   }
 

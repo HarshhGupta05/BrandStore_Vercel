@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 export default function OrdersPage() {
-  const { user, getAllOrders } = useStore()
+  const { user, getAllOrders, isLoading, cancelOrder } = useStore()
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showSuccess, setShowSuccess] = useState(false)
@@ -23,12 +24,34 @@ export default function OrdersPage() {
     }
   }, [searchParams])
 
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/login?redirect=/orders")
+    }
+  }, [isLoading, user, router])
+
+  if (isLoading) {
+    return <div className="flex h-[50vh] items-center justify-center">Loading...</div>
+  }
+
   if (!user) {
-    router.push("/login?redirect=/orders")
     return null
   }
 
   const orders = getAllOrders()
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (confirm("Are you sure you want to cancel this order?")) {
+      setCancellingId(orderId)
+      try {
+        await cancelOrder(orderId)
+      } catch (error) {
+        alert("Failed to cancel order")
+      } finally {
+        setCancellingId(null)
+      }
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -125,6 +148,20 @@ export default function OrdersPage() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Actions */}
+                  {order.orderStatus === "Placed" || order.orderStatus === "Processing" ? (
+                    <div className="flex justify-end border-t pt-4">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleCancelOrder(order.id)}
+                        disabled={cancellingId === order.id}
+                      >
+                        {cancellingId === order.id ? "Cancelling..." : "Cancel Order"}
+                      </Button>
+                    </div>
+                  ) : null}
 
                   {/* Total */}
                   <div className="flex justify-between border-t pt-4 text-lg font-bold">
