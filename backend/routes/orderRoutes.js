@@ -30,6 +30,7 @@ router.post('/', protect, async (req, res) => {
 
             if (req.user) {
                 try {
+                    // Update legacy address field
                     req.user.address = {
                         address: shippingAddress.address,
                         city: shippingAddress.city,
@@ -37,9 +38,32 @@ router.post('/', protect, async (req, res) => {
                         country: shippingAddress.country,
                         phone: shippingAddress.phone
                     };
-                    req.user.markModified('address'); // Explicitly mark as modified
-                    const updatedUser = await req.user.save();
-                    console.log('Updated User Address:', updatedUser.address);
+                    req.user.markModified('address');
+
+                    // Add to addresses list if not exists
+                    if (!req.user.addresses) {
+                        req.user.addresses = [];
+                    }
+
+                    const addressExists = req.user.addresses.some(addr =>
+                        addr.address === shippingAddress.address &&
+                        addr.postalCode === shippingAddress.postalCode
+                    );
+
+                    if (!addressExists) {
+                        req.user.addresses.push({
+                            name: shippingAddress.name || req.user.name,
+                            address: shippingAddress.address,
+                            city: shippingAddress.city,
+                            postalCode: shippingAddress.postalCode,
+                            country: shippingAddress.country,
+                            phone: shippingAddress.phone,
+                            isDefault: req.user.addresses.length === 0
+                        });
+                    }
+
+                    await req.user.save();
+                    console.log('Updated User Address List'); // Logging
                 } catch (err) {
                     console.error("Failed to update user address:", err);
                     // Do not fail the order creation if user update fails

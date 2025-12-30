@@ -190,7 +190,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$Brand
 var __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/OneDrive/Desktop/BrandStore_Vercel/components/ui/button.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/OneDrive/Desktop/BrandStore_Vercel/node_modules/next/dist/client/app-dir/link.js [app-client] (ecmascript)");
 ;
-var _s = __turbopack_context__.k.signature();
+var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature();
 "use client";
 ;
 ;
@@ -200,13 +200,202 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-function OrdersPage() {
+function ReviewForm({ productId, productName, onCancel }) {
     _s();
-    const { user, getAllOrders, isLoading, cancelOrder } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$contexts$2f$store$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useStore"])();
+    const { submitReview, user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$contexts$2f$store$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useStore"])();
+    const [rating, setRating] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(0);
+    const [comment, setComment] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("");
+    const [isSubmitting, setIsSubmitting] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const handleSubmit = async (e)=>{
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await submitReview(productId, rating, comment);
+            alert("Review submitted successfully!");
+            onCancel();
+        } catch (error) {
+            alert(error.message);
+        } finally{
+            setIsSubmitting(false);
+        }
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
+        className: "mt-4 border-primary/20 bg-primary/5 shadow-inner",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardHeader"], {
+                className: "pb-2",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex items-center justify-between",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardTitle"], {
+                        className: "text-sm font-bold",
+                        children: [
+                            "Reviewing ",
+                            productName
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                        lineNumber: 37,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                    lineNumber: 36,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                lineNumber: 35,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
+                    onSubmit: handleSubmit,
+                    className: "space-y-4",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "space-y-2",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "flex items-center justify-between",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                            className: "text-xs font-semibold text-foreground/80",
+                                            children: "Your Rating"
+                                        }, void 0, false, {
+                                            fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                            lineNumber: 44,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                            className: "text-[10px] text-muted-foreground",
+                                            children: [
+                                                "Account: ",
+                                                user?.name
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                            lineNumber: 45,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                    lineNumber: 43,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                    type: "number",
+                                    min: "1",
+                                    max: "5",
+                                    className: "w-20 rounded-lg border bg-background/50 backdrop-blur-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all",
+                                    value: rating === 0 ? "" : rating,
+                                    onChange: (e)=>setRating(Number(e.target.value)),
+                                    placeholder: "1-5",
+                                    required: true
+                                }, void 0, false, {
+                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                    lineNumber: 47,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                            lineNumber: 42,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "space-y-2",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                    className: "text-xs font-semibold text-foreground/80",
+                                    children: "Your Thoughts"
+                                }, void 0, false, {
+                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                    lineNumber: 59,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
+                                    className: "w-full rounded-lg border bg-background/50 backdrop-blur-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground/40",
+                                    rows: 3,
+                                    placeholder: "Tell us what you liked (or didn't like) about this item...",
+                                    value: comment,
+                                    onChange: (e)=>setComment(e.target.value),
+                                    required: true
+                                }, void 0, false, {
+                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                    lineNumber: 60,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                            lineNumber: 58,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "flex justify-end gap-2 border-t pt-4",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                                    type: "button",
+                                    variant: "ghost",
+                                    size: "sm",
+                                    onClick: onCancel,
+                                    className: "text-xs",
+                                    children: "Cancel"
+                                }, void 0, false, {
+                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                    lineNumber: 70,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                                    type: "submit",
+                                    size: "sm",
+                                    disabled: isSubmitting,
+                                    className: "text-xs shadow-md",
+                                    children: isSubmitting ? "Submitting..." : "Post Review"
+                                }, void 0, false, {
+                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                    lineNumber: 71,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                            lineNumber: 69,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                    lineNumber: 41,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                lineNumber: 40,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+        lineNumber: 34,
+        columnNumber: 5
+    }, this);
+}
+_s(ReviewForm, "am1tDmU7jalpukAvecKUh++AQn8=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$contexts$2f$store$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useStore"]
+    ];
+});
+_c = ReviewForm;
+function OrdersPage() {
+    _s1();
+    const { user, getAllOrders, isLoading, cancelOrder, fetchOrders } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$contexts$2f$store$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useStore"])();
     const [cancellingId, setCancellingId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
     const searchParams = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSearchParams"])();
     const [showSuccess, setShowSuccess] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [reviewingProduct, setReviewingProduct] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "OrdersPage.useEffect": ()=>{
             const successOrderId = searchParams.get("success");
@@ -224,12 +413,15 @@ function OrdersPage() {
         "OrdersPage.useEffect": ()=>{
             if (!isLoading && !user) {
                 router.push("/login?redirect=/orders");
+            } else if (user) {
+                fetchOrders();
             }
         }
     }["OrdersPage.useEffect"], [
         isLoading,
         user,
-        router
+        router,
+        fetchOrders
     ]);
     if (isLoading) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -237,7 +429,7 @@ function OrdersPage() {
             children: "Loading..."
         }, void 0, false, {
             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-            lineNumber: 34,
+            lineNumber: 106,
             columnNumber: 12
         }, this);
     }
@@ -269,7 +461,7 @@ function OrdersPage() {
                             className: "h-6 w-6 text-green-600"
                         }, void 0, false, {
                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                            lineNumber: 61,
+                            lineNumber: 133,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -279,7 +471,7 @@ function OrdersPage() {
                                     children: "Order placed successfully!"
                                 }, void 0, false, {
                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                    lineNumber: 63,
+                                    lineNumber: 135,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -287,24 +479,24 @@ function OrdersPage() {
                                     children: "You will receive a confirmation email shortly."
                                 }, void 0, false, {
                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                    lineNumber: 64,
+                                    lineNumber: 136,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                            lineNumber: 62,
+                            lineNumber: 134,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                    lineNumber: 60,
+                    lineNumber: 132,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                lineNumber: 59,
+                lineNumber: 131,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
@@ -312,7 +504,7 @@ function OrdersPage() {
                 children: "My Orders"
             }, void 0, false, {
                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                lineNumber: 70,
+                lineNumber: 142,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -320,7 +512,7 @@ function OrdersPage() {
                 children: "Track and view your order history"
             }, void 0, false, {
                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                lineNumber: 71,
+                lineNumber: 143,
                 columnNumber: 7
             }, this),
             orders.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -331,7 +523,7 @@ function OrdersPage() {
                             className: "mx-auto mb-4 h-16 w-16 text-muted-foreground"
                         }, void 0, false, {
                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                            lineNumber: 76,
+                            lineNumber: 148,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -339,7 +531,7 @@ function OrdersPage() {
                             children: "No orders yet"
                         }, void 0, false, {
                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                            lineNumber: 77,
+                            lineNumber: 149,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -347,7 +539,7 @@ function OrdersPage() {
                             children: "Start shopping to create your first order"
                         }, void 0, false, {
                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                            lineNumber: 78,
+                            lineNumber: 150,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -357,23 +549,23 @@ function OrdersPage() {
                                 children: "Browse Products"
                             }, void 0, false, {
                                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                lineNumber: 80,
+                                lineNumber: 152,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                            lineNumber: 79,
+                            lineNumber: 151,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                    lineNumber: 75,
+                    lineNumber: 147,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                lineNumber: 74,
+                lineNumber: 146,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "space-y-4",
@@ -392,7 +584,7 @@ function OrdersPage() {
                                                             className: "h-5 w-5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                            lineNumber: 92,
+                                                            lineNumber: 164,
                                                             columnNumber: 23
                                                         }, this),
                                                         "Order #",
@@ -400,7 +592,7 @@ function OrdersPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 91,
+                                                    lineNumber: 163,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -414,51 +606,39 @@ function OrdersPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 95,
+                                                    lineNumber: 167,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                            lineNumber: 90,
+                                            lineNumber: 162,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: "flex flex-col gap-2",
-                                            children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
-                                                    variant: order.orderStatus === "Placed" ? "default" : "secondary",
-                                                    className: "justify-center",
-                                                    children: order.orderStatus
-                                                }, void 0, false, {
-                                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 101,
-                                                    columnNumber: 21
-                                                }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
-                                                    variant: "outline",
-                                                    className: "justify-center",
-                                                    children: order.deliveryStatus
-                                                }, void 0, false, {
-                                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 107,
-                                                    columnNumber: 21
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
+                                                className: `justify-center ${order.orderStatus === "Delivered" ? "bg-green-600 hover:bg-green-700" : order.orderStatus === "Cancelled" ? "bg-red-600 hover:bg-red-700" : order.orderStatus === "Placed" ? "bg-blue-600 hover:bg-blue-700" : "bg-yellow-600 hover:bg-yellow-700"}`,
+                                                children: order.orderStatus
+                                            }, void 0, false, {
+                                                fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                lineNumber: 173,
+                                                columnNumber: 21
+                                            }, this)
+                                        }, void 0, false, {
                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                            lineNumber: 100,
+                                            lineNumber: 172,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                    lineNumber: 89,
+                                    lineNumber: 161,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                lineNumber: 88,
+                                lineNumber: 160,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -473,46 +653,88 @@ function OrdersPage() {
                                                     children: "Items:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 117,
+                                                    lineNumber: 189,
                                                     columnNumber: 21
                                                 }, this),
                                                 order.items.map((item, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                        className: "flex justify-between text-sm",
+                                                        className: "space-y-2",
                                                         children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "flex items-center justify-between text-sm",
                                                                 children: [
-                                                                    item.productName,
-                                                                    " ",
-                                                                    item.selectedSize && `(${item.selectedSize})`,
-                                                                    " x ",
-                                                                    item.quantity
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                        children: [
+                                                                            item.productName,
+                                                                            " ",
+                                                                            item.selectedSize && `(${item.selectedSize})`,
+                                                                            " x ",
+                                                                            item.quantity
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                                        lineNumber: 193,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "flex items-center gap-4",
+                                                                        children: [
+                                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                className: "font-semibold",
+                                                                                children: [
+                                                                                    "₹",
+                                                                                    (item.price * item.quantity).toFixed(2)
+                                                                                ]
+                                                                            }, void 0, true, {
+                                                                                fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                                                lineNumber: 197,
+                                                                                columnNumber: 29
+                                                                            }, this),
+                                                                            order.orderStatus === "Delivered" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
+                                                                                variant: "outline",
+                                                                                size: "sm",
+                                                                                className: "h-7 px-2 text-xs",
+                                                                                onClick: ()=>setReviewingProduct({
+                                                                                        orderId: order.id,
+                                                                                        productId: item.productId,
+                                                                                        productName: item.productName
+                                                                                    }),
+                                                                                children: "Rate & Review"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                                                lineNumber: 199,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                                        lineNumber: 196,
+                                                                        columnNumber: 27
+                                                                    }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                lineNumber: 120,
+                                                                lineNumber: 192,
                                                                 columnNumber: 25
                                                             }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "font-semibold",
-                                                                children: [
-                                                                    "₹",
-                                                                    (item.price * item.quantity).toFixed(2)
-                                                                ]
-                                                            }, void 0, true, {
+                                                            reviewingProduct?.orderId === order.id && reviewingProduct?.productId === item.productId && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(ReviewForm, {
+                                                                productId: item.productId,
+                                                                productName: item.productName,
+                                                                onCancel: ()=>setReviewingProduct(null)
+                                                            }, void 0, false, {
                                                                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                lineNumber: 123,
-                                                                columnNumber: 25
+                                                                lineNumber: 215,
+                                                                columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, idx, true, {
                                                         fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                        lineNumber: 119,
+                                                        lineNumber: 191,
                                                         columnNumber: 23
                                                     }, this))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                            lineNumber: 116,
+                                            lineNumber: 188,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -523,7 +745,7 @@ function OrdersPage() {
                                                     children: "Delivery Details:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 130,
+                                                    lineNumber: 227,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -536,7 +758,7 @@ function OrdersPage() {
                                                                     children: "Name:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                    lineNumber: 133,
+                                                                    lineNumber: 230,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -544,7 +766,7 @@ function OrdersPage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                            lineNumber: 132,
+                                                            lineNumber: 229,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -554,7 +776,7 @@ function OrdersPage() {
                                                                     children: "Phone:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                    lineNumber: 136,
+                                                                    lineNumber: 233,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -562,7 +784,7 @@ function OrdersPage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                            lineNumber: 135,
+                                                            lineNumber: 232,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -572,7 +794,7 @@ function OrdersPage() {
                                                                     children: "Address:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                    lineNumber: 139,
+                                                                    lineNumber: 236,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -580,7 +802,7 @@ function OrdersPage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                            lineNumber: 138,
+                                                            lineNumber: 235,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -590,7 +812,7 @@ function OrdersPage() {
                                                                     children: "Delivery Option:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                    lineNumber: 142,
+                                                                    lineNumber: 239,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -598,7 +820,7 @@ function OrdersPage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                            lineNumber: 141,
+                                                            lineNumber: 238,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -608,7 +830,7 @@ function OrdersPage() {
                                                                     children: "Payment Method:"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                                    lineNumber: 146,
+                                                                    lineNumber: 243,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -616,22 +838,22 @@ function OrdersPage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                            lineNumber: 145,
+                                                            lineNumber: 242,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 131,
+                                                    lineNumber: 228,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                            lineNumber: 129,
+                                            lineNumber: 226,
                                             columnNumber: 19
                                         }, this),
-                                        order.orderStatus === "Placed" || order.orderStatus === "Processing" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        order.orderStatus !== "Delivered" && order.orderStatus !== "Cancelled" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: "flex justify-end border-t pt-4",
                                             children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                                 variant: "destructive",
@@ -641,14 +863,44 @@ function OrdersPage() {
                                                 children: cancellingId === order.id ? "Cancelling..." : "Cancel Order"
                                             }, void 0, false, {
                                                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                lineNumber: 155,
+                                                lineNumber: 252,
                                                 columnNumber: 23
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                            lineNumber: 154,
+                                            lineNumber: 251,
                                             columnNumber: 21
-                                        }, this) : null,
+                                        }, this) : order.orderStatus === "Delivered" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex flex-col items-end gap-2 border-t pt-4",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
+                                                    className: "bg-green-100 text-green-800 hover:bg-green-100",
+                                                    children: "Order Delivered"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                    lineNumber: 264,
+                                                    columnNumber: 25
+                                                }, this),
+                                                order.deliveredAt && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: "text-xs text-muted-foreground",
+                                                    children: [
+                                                        "Delivered on ",
+                                                        new Date(order.deliveredAt).toLocaleDateString(),
+                                                        " at",
+                                                        " ",
+                                                        new Date(order.deliveredAt).toLocaleTimeString()
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                                    lineNumber: 268,
+                                                    columnNumber: 27
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
+                                            lineNumber: 263,
+                                            columnNumber: 23
+                                        }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: "flex justify-between border-t pt-4 text-lg font-bold",
                                             children: [
@@ -656,7 +908,7 @@ function OrdersPage() {
                                                     children: "Total:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 168,
+                                                    lineNumber: 279,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -666,54 +918,55 @@ function OrdersPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                                    lineNumber: 169,
+                                                    lineNumber: 280,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                            lineNumber: 167,
+                                            lineNumber: 278,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                    lineNumber: 114,
+                                    lineNumber: 186,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                                lineNumber: 113,
+                                lineNumber: 185,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, order.id, true, {
                         fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                        lineNumber: 87,
+                        lineNumber: 159,
                         columnNumber: 13
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-                lineNumber: 85,
+                lineNumber: 157,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/app/orders/page.tsx",
-        lineNumber: 57,
+        lineNumber: 129,
         columnNumber: 5
     }, this);
 }
-_s(OrdersPage, "v+14h9U6EF31koV6xd9wtRjiO6s=", false, function() {
+_s1(OrdersPage, "zAYQVTpJWTJrg7BGFdKmQ8K02vo=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$contexts$2f$store$2d$context$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useStore"],
         __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
         __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSearchParams"]
     ];
 });
-_c = OrdersPage;
-var _c;
-__turbopack_context__.k.register(_c, "OrdersPage");
+_c1 = OrdersPage;
+var _c, _c1;
+__turbopack_context__.k.register(_c, "ReviewForm");
+__turbopack_context__.k.register(_c1, "OrdersPage");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }

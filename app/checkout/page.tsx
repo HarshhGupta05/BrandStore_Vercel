@@ -2,14 +2,14 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useStore } from "@/contexts/store-context"
+import { useStore, type Address } from "@/contexts/store-context"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useRouter } from "next/navigation"
-import { ShoppingBag, Package, CreditCard, Banknote, CheckCircle2 } from "lucide-react"
+import { ShoppingBag, Package, CreditCard, Banknote, CheckCircle2, Plus, MapPin } from "lucide-react"
 
 export default function CheckoutPage() {
   const { cart, createOrder, user, getCartTotal, isLoading } = useStore()
@@ -26,6 +26,7 @@ export default function CheckoutPage() {
     paymentMethod: "credit" as "credit" | "debit" | "cod",
   })
 
+  const [selectedAddressMode, setSelectedAddressMode] = useState<string>("new")
   const [isProcessing, setIsProcessing] = useState(false)
 
   const total = getCartTotal()
@@ -36,9 +37,51 @@ export default function CheckoutPage() {
         router.push("/login?redirect=/checkout")
       } else if (cart.length === 0) {
         router.push("/cart")
+      } else if (user?.addresses && user.addresses.length > 0) {
+        // Pre-select the default address or the first one
+        const defaultIndex = user.addresses.findIndex(a => a.isDefault)
+        const indexToUse = defaultIndex >= 0 ? defaultIndex : 0
+        setSelectedAddressMode(indexToUse.toString())
+        selectAddress(user.addresses[indexToUse])
       }
     }
   }, [isLoading, user, cart, router])
+
+  const selectAddress = (address: Address) => {
+    setFormData(prev => ({
+      ...prev,
+      name: address.name,
+      phone: address.phone,
+      address: address.address,
+      city: address.city,
+      postalCode: address.postalCode,
+      country: address.country
+    }))
+    // Generate a unique ID for selection state if needed, or just use index/some other way
+    // For now we rely on content matching or just 'existing' mode visual
+    // Actually we need to track which radio button is active
+    // We can use a composite key or index
+  }
+
+  const handleAddressSelection = (value: string) => {
+    setSelectedAddressMode(value)
+    if (value === "new") {
+      setFormData(prev => ({
+        ...prev,
+        name: "",
+        phone: "",
+        address: "",
+        city: "",
+        postalCode: "",
+        country: ""
+      }))
+    } else {
+      const index = parseInt(value)
+      if (user?.addresses && user.addresses[index]) {
+        selectAddress(user.addresses[index])
+      }
+    }
+  }
 
   if (isLoading) {
     return <div className="flex h-[50vh] items-center justify-center">Loading...</div>
@@ -90,13 +133,57 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <form onSubmit={handleCheckout} className="space-y-6">
-            {/* Delivery Details */}
+
+            {/* Address Selection */}
+            {user.addresses && user.addresses.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Select Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup value={selectedAddressMode} onValueChange={handleAddressSelection} className="grid gap-4 sm:grid-cols-2">
+                    {user.addresses.map((addr, index) => (
+                      <div key={index}>
+                        <RadioGroupItem value={index.toString()} id={`addr-${index}`} className="peer sr-only" />
+                        <Label
+                          htmlFor={`addr-${index}`}
+                          className="flex flex-col gap-1 rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <span className="font-semibold">{addr.name}</span>
+                          <span className="text-sm text-muted-foreground">{addr.address}</span>
+                          <span className="text-sm text-muted-foreground">{addr.city}, {addr.postalCode}</span>
+                          <span className="text-sm text-muted-foreground">{addr.phone}</span>
+                        </Label>
+                      </div>
+                    ))}
+                    <div>
+                      <RadioGroupItem value="new" id="addr-new" className="peer sr-only" />
+                      <Label
+                        htmlFor="addr-new"
+                        className="flex h-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent peer-data-[state=checked]:border-primary cursor-pointer border-dashed"
+                      >
+                        <Plus className="h-6 w-6 text-muted-foreground" />
+                        <span className="font-semibold text-muted-foreground">Add New Address</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Delivery Details Form */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
                   Delivery Information
                 </CardTitle>
+                {selectedAddressMode !== "new" && (
+                  <CardDescription>Review the selected address details below.</CardDescription>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">

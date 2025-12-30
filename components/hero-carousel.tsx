@@ -25,7 +25,7 @@ const heroSlides = [
     cta: "Explore Accessories",
     link: "/categories?category=Accessories",
     bgClass: "bg-gradient-to-br from-slate-900 via-slate-800 to-primary/80",
-    image: "/black-leather-jacket.png"
+    image: "/iem-mug.jpeg"
   },
   {
     id: 3,

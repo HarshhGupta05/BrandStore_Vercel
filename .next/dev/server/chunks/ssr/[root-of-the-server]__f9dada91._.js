@@ -133,7 +133,6 @@ function CardFooter({ className, ...props }) {
 "[project]/OneDrive/Desktop/BrandStore_Vercel/lib/dummy-data.ts [app-rsc] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-// Dummy product data
 __turbopack_context__.s([
     "categories",
     ()=>categories,

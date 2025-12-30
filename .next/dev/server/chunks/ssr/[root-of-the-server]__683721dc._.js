@@ -26,7 +26,6 @@ module.exports = mod;
 "[project]/OneDrive/Desktop/BrandStore_Vercel/lib/dummy-data.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-// Dummy product data
 __turbopack_context__.s([
     "categories",
     ()=>categories,
@@ -275,13 +274,8 @@ const api = __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$
     }
 });
 api.interceptors.request.use((config)=>{
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-        const parsedToken = JSON.parse(token); // The current implementation stores the whole token object as string
-        if (parsedToken.token) {
-            config.headers.Authorization = `Bearer ${parsedToken.token}`;
-        }
-    }
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
     return config;
 });
 const __TURBOPACK__default__export__ = api;
@@ -358,48 +352,51 @@ function StoreProvider({ children }) {
         // This will be handled in a separate effect dependent on 'user'
         setIsLoading(false);
     }, []);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        const fetchOrders = async ()=>{
-            if (user) {
-                try {
-                    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/orders');
-                    // Map backend order to frontend Order interface
-                    const mappedOrders = data.map((order)=>({
-                            id: order._id,
-                            userId: order.user?._id || "unknown",
-                            items: order.orderItems.map((item)=>({
-                                    productId: item.product,
-                                    productName: item.name,
-                                    quantity: item.quantity,
-                                    price: item.price,
-                                    selectedSize: item.size
-                                })),
-                            total: order.totalPrice,
-                            deliveryDetails: {
-                                name: order.shippingAddress?.name || order.user?.name || "Unknown User",
-                                phone: order.shippingAddress?.phone || "Not provided",
-                                address: order.shippingAddress?.address || "",
-                                city: order.shippingAddress?.city || "",
-                                postalCode: order.shippingAddress?.postalCode || "",
-                                country: order.shippingAddress?.country || "",
-                                deliveryOption: "home",
-                                paymentMethod: order.paymentMethod
-                            },
-                            orderStatus: order.status === 'Cancelled' ? 'Cancelled' : order.status === 'pending' ? 'Placed' : order.status === 'Processing' ? 'Processing' : order.status === 'Shipped' ? 'Shipped' : order.status === 'Delivered' ? 'Delivered' : 'Processing',
-                            deliveryStatus: order.isDelivered ? 'Delivered' : 'In Process',
-                            createdAt: order.createdAt
-                        }));
-                    setOrders(mappedOrders);
-                } catch (e) {
-                    console.error("Failed to fetch orders", e);
-                    if (e.response && e.response.status === 401) {
-                        logout();
-                    }
+    const fetchOrders = async ()=>{
+        if (user) {
+            try {
+                const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/orders');
+                // Map backend order to frontend Order interface
+                const mappedOrders = data.map((order)=>({
+                        id: order._id,
+                        userId: order.user?._id || "unknown",
+                        items: order.orderItems.map((item)=>({
+                                productId: item.productId || item.product,
+                                productName: item.name,
+                                quantity: item.quantity,
+                                price: item.price,
+                                selectedSize: item.size
+                            })),
+                        total: order.totalPrice,
+                        deliveryDetails: {
+                            name: order.shippingAddress?.name || order.user?.name || "Unknown User",
+                            phone: order.shippingAddress?.phone || "Not provided",
+                            address: order.shippingAddress?.address || "",
+                            city: order.shippingAddress?.city || "",
+                            postalCode: order.shippingAddress?.postalCode || "",
+                            country: order.shippingAddress?.country || "",
+                            deliveryOption: "home",
+                            paymentMethod: order.paymentMethod
+                        },
+                        orderStatus: order.status === 'Cancelled' ? 'Cancelled' : order.status === 'Placed' ? 'Placed' : order.status === 'In Process' ? 'In Process' : order.status === 'Shipped' ? 'Shipped' : order.status === 'Delivered' ? 'Delivered' : 'Placed',
+                        deliveryStatus: order.status === 'Delivered' ? 'Delivered' : order.status === 'Cancelled' ? 'Rejected' : 'In Process',
+                        createdAt: order.createdAt,
+                        deliveredAt: order.deliveredAt
+                    }));
+                // Sort by createdAt desc
+                mappedOrders.sort((a, b)=>new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                setOrders(mappedOrders);
+            } catch (e) {
+                console.error("Failed to fetch orders", e);
+                if (e.response && e.response.status === 401) {
+                    logout();
                 }
-            } else {
-                setOrders([]);
             }
-        };
+        } else {
+            setOrders([]);
+        }
+    };
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         fetchOrders();
     }, [
         user
@@ -503,6 +500,7 @@ function StoreProvider({ children }) {
                 image: item.image,
                 price: item.price,
                 product: item._id || item.id,
+                productId: item.id,
                 size: item.selectedSize
             }));
         const total = getCartTotal();
@@ -544,6 +542,8 @@ function StoreProvider({ children }) {
                     ...prev
                 ]);
             clearCart();
+            // Refresh user to get updated addresses if any were added
+            await refreshUser();
             return newOrder;
         } catch (error) {
             console.error("Create order failed", error);
@@ -621,52 +621,54 @@ function StoreProvider({ children }) {
             stock: newStock
         });
     };
-    const updateOrderDeliveryStatus = (orderId, status, deliveryAgent)=>{
-        setOrders((prev)=>{
-            const updatedOrders = prev.map((order)=>{
-                if (order.id === orderId) {
-                    const previousStatus = order.deliveryStatus;
-                    const newOrder = {
-                        ...order,
-                        deliveryStatus: status
-                    };
-                    if (status === "Delivered" && previousStatus !== "Delivered") {
-                        setProducts((prevProducts)=>prevProducts.map((product)=>{
-                                const orderItem = order.items.find((item)=>item.productId === product.id);
-                                if (orderItem) {
-                                    return {
-                                        ...product,
-                                        stock: Math.max(0, product.stock - orderItem.quantity)
-                                    };
-                                }
-                                return product;
-                            }));
-                        const newLogs = order.items.map((item)=>({
-                                id: `LOG-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                                orderId: order.id,
-                                productName: item.productName,
-                                quantity: item.quantity,
-                                price: item.price,
-                                deliveryAgent: deliveryAgent || "Not specified",
-                                deliveredAt: new Date().toISOString()
-                            }));
-                        setDeliveryLogs((prevLogs)=>[
-                                ...newLogs,
-                                ...prevLogs
-                            ]);
-                        newOrder.orderStatus = "Delivered";
-                    }
-                    if (status === "Rejected") {
-                        newOrder.orderStatus = "Cancelled";
-                    } else if (status === "Not Received") {
-                        newOrder.orderStatus = "Cancelled";
-                    }
-                    return newOrder;
-                }
-                return order;
+    const updateOrderDeliveryStatus = async (orderId, status, deliveryAgent)=>{
+        try {
+            // Map frontend delivery status back to backend status
+            let backendStatus = status;
+            if (status === "In Process") backendStatus = "In Process";
+            if (status === "Delivered") backendStatus = "Delivered";
+            if (status === "Rejected") backendStatus = "Cancelled";
+            if (status === "Not Received") backendStatus = "Cancelled";
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].put(`/orders/${orderId}/status`, {
+                status: backendStatus
             });
-            return updatedOrders;
-        });
+            // Update local state by refetching
+            await fetchOrders();
+            // If delivered, we still want to add delivery logs (optional but keep for compatibility)
+            if (status === "Delivered") {
+                const order = orders.find((o)=>o.id === orderId);
+                if (order) {
+                    const newLogs = order.items.map((item)=>({
+                            id: `LOG-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            orderId: order.id,
+                            productName: item.productName,
+                            quantity: item.quantity,
+                            price: item.price,
+                            deliveryAgent: deliveryAgent || "Not specified",
+                            deliveredAt: new Date().toISOString()
+                        }));
+                    setDeliveryLogs((prevLogs)=>[
+                            ...newLogs,
+                            ...prevLogs
+                        ]);
+                    // Update stock locally if not already done by backend (ideally backend should handle this, 
+                    // but we follow current logic)
+                    setProducts((prevProducts)=>prevProducts.map((product)=>{
+                            const orderItem = order.items.find((item)=>item.productId === product.id);
+                            if (orderItem) {
+                                return {
+                                    ...product,
+                                    stock: Math.max(0, product.stock - orderItem.quantity)
+                                };
+                            }
+                            return product;
+                        }));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to update order status", error);
+            throw error;
+        }
     };
     const login = async (email, password)=>{
         try {
@@ -678,7 +680,8 @@ function StoreProvider({ children }) {
                 id: data._id,
                 email: data.email,
                 name: data.name,
-                role: data.role
+                role: data.role,
+                addresses: data.addresses || []
             };
             const authToken = {
                 token: data.token,
@@ -705,7 +708,8 @@ function StoreProvider({ children }) {
                 id: data._id,
                 email: data.email,
                 name: data.name,
-                role: data.role
+                role: data.role,
+                addresses: []
             };
             const authToken = {
                 token: data.token,
@@ -723,6 +727,29 @@ function StoreProvider({ children }) {
     const logout = ()=>{
         localStorage.removeItem("auth_token");
         setUser(null);
+    };
+    const refreshUser = async ()=>{
+        if (!user) return;
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/users/profile');
+            const updatedUser = {
+                id: data._id,
+                email: data.email,
+                name: data.name,
+                role: data.role,
+                addresses: data.addresses || []
+            };
+            setUser(updatedUser);
+            // Update local storage
+            const storedAuth = localStorage.getItem("auth_token");
+            if (storedAuth) {
+                const authData = JSON.parse(storedAuth);
+                authData.user = updatedUser;
+                localStorage.setItem("auth_token", JSON.stringify(authData));
+            }
+        } catch (error) {
+            console.error("Failed to refresh user", error);
+        }
     };
     const isAdmin = user?.role === "admin";
     const createManufacturerOrder = async (orderData)=>{
@@ -877,6 +904,41 @@ function StoreProvider({ children }) {
             throw error;
         }
     };
+    const submitReview = async (productId, rating, comment)=>{
+        try {
+            await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].post(`/products/${productId}/reviews`, {
+                rating,
+                comment
+            });
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get('/products');
+            setProducts(data);
+        } catch (error) {
+            console.error("Failed to submit review:", error);
+            throw new Error(error.response?.data?.message || "Failed to submit review");
+        }
+    };
+    const addAddress = async (address)=>{
+        try {
+            const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].post('/users/addresses', address);
+            if (user) {
+                const updatedUser = {
+                    ...user,
+                    addresses: data
+                };
+                setUser(updatedUser);
+                // Update local storage
+                const storedAuth = localStorage.getItem("auth_token");
+                if (storedAuth) {
+                    const authData = JSON.parse(storedAuth);
+                    authData.user = updatedUser;
+                    localStorage.setItem("auth_token", JSON.stringify(authData));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to add address", error);
+            throw error;
+        }
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$OneDrive$2f$Desktop$2f$BrandStore_Vercel$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(StoreContext.Provider, {
         value: {
             // ... existing values
@@ -914,12 +976,16 @@ function StoreProvider({ children }) {
             vendorInvoices,
             fetchVendorInvoices,
             payVendorInvoice,
+            refreshUser,
+            fetchOrders,
+            submitReview,
+            addAddress,
             isLoading
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/OneDrive/Desktop/BrandStore_Vercel/contexts/store-context.tsx",
-        lineNumber: 729,
+        lineNumber: 809,
         columnNumber: 5
     }, this);
 }

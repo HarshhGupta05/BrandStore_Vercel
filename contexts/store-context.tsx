@@ -10,11 +10,22 @@ interface CartItem extends Product {
   selectedSize?: string // For products with sizes
 }
 
+export interface Address {
+  name: string
+  address: string
+  city: string
+  postalCode: string
+  country: string
+  phone: string
+  isDefault?: boolean
+}
+
 interface User {
   id: string
   email: string
   name: string
   role: "admin" | "user"
+  addresses?: Address[]
 }
 
 interface AuthToken {
@@ -148,9 +159,10 @@ interface StoreContextType {
   vendorInvoices: VendorInvoice[]
   fetchVendorInvoices: () => Promise<void>
   payVendorInvoice: (invoiceId: string) => Promise<void>
-
+  refreshUser: () => Promise<void>
   fetchOrders: () => Promise<void>
   submitReview: (productId: string, rating: number, comment: string) => Promise<void>
+  addAddress: (address: Address) => Promise<void>
   isLoading: boolean
 }
 
@@ -409,6 +421,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       setOrders((prev) => [newOrder, ...prev])
       clearCart()
+      // Refresh user to get updated addresses if any were added
+      await refreshUser()
       return newOrder
     } catch (error) {
       console.error("Create order failed", error)
@@ -532,6 +546,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         email: data.email,
         name: data.name,
         role: data.role as "admin" | "user",
+        addresses: data.addresses || []
       }
 
       const authToken: AuthToken = {
@@ -562,6 +577,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         email: data.email,
         name: data.name,
         role: data.role as "admin" | "user",
+        addresses: []
       }
 
       const authToken: AuthToken = {
@@ -582,6 +598,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem("auth_token")
     setUser(null)
+  }
+
+  const refreshUser = async () => {
+    if (!user) return
+    try {
+      const { data } = await api.get('/users/profile')
+      const updatedUser: User = {
+        id: data._id,
+        email: data.email,
+        name: data.name,
+        role: data.role as "admin" | "user",
+        addresses: data.addresses || []
+      }
+      setUser(updatedUser)
+      // Update local storage
+      const storedAuth = localStorage.getItem("auth_token")
+      if (storedAuth) {
+        const authData = JSON.parse(storedAuth)
+        authData.user = updatedUser
+        localStorage.setItem("auth_token", JSON.stringify(authData))
+      }
+    } catch (error) {
+      console.error("Failed to refresh user", error)
+    }
   }
 
   const isAdmin = user?.role === "admin"
@@ -744,6 +784,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const addAddress = async (address: Address) => {
+    try {
+      const { data } = await api.post('/users/addresses', address)
+      if (user) {
+        const updatedUser = { ...user, addresses: data }
+        setUser(updatedUser)
+
+        // Update local storage
+        const storedAuth = localStorage.getItem("auth_token")
+        if (storedAuth) {
+          const authData = JSON.parse(storedAuth)
+          authData.user = updatedUser
+          localStorage.setItem("auth_token", JSON.stringify(authData))
+        }
+      }
+    } catch (error) {
+      console.error("Failed to add address", error)
+      throw error
+    }
+  }
+
   return (
     <StoreContext.Provider
       value={{
@@ -782,8 +843,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         vendorInvoices,
         fetchVendorInvoices,
         payVendorInvoice,
+        refreshUser,
         fetchOrders,
         submitReview,
+        addAddress,
         isLoading
       }}
     >
