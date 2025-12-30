@@ -1,7 +1,0 @@
-module.exports = [
-"[project]/OneDrive/Desktop/BrandStore_Vercel/.next-internal/server/app/admin/manufacturer/page/actions.js [app-rsc] (server actions loader, ecmascript)", ((__turbopack_context__, module, exports) => {
-
-}),
-];
-
-//# sourceMappingURL=2947f_Vercel__next-internal_server_app_admin_manufacturer_page_actions_b1df2ba7.js.map
