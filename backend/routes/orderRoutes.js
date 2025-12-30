@@ -8,6 +8,8 @@ router.post('/', protect, async (req, res) => {
         orderItems,
         shippingAddress,
         paymentMethod,
+        taxPrice,
+        shippingPrice,
         totalPrice,
     } = req.body;
 
@@ -23,6 +25,8 @@ router.post('/', protect, async (req, res) => {
                 orderItems,
                 shippingAddress,
                 paymentMethod,
+                taxPrice,
+                shippingPrice,
                 totalPrice,
             });
 

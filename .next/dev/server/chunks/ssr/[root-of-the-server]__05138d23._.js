@@ -367,7 +367,9 @@ function StoreProvider({ children }) {
                                 price: item.price,
                                 selectedSize: item.size
                             })),
-                        total: order.totalPrice,
+                        total: Number(order.totalPrice) || 0,
+                        taxPrice: Number(order.taxPrice) || 0,
+                        shippingPrice: Number(order.shippingPrice) || 0,
                         deliveryDetails: {
                             name: order.shippingAddress?.name || order.user?.name || "Unknown User",
                             phone: order.shippingAddress?.phone || "Not provided",
@@ -516,7 +518,9 @@ function StoreProvider({ children }) {
                     country: deliveryDetails.country
                 },
                 paymentMethod: deliveryDetails.paymentMethod,
-                totalPrice: total
+                taxPrice: total * 0.1,
+                shippingPrice: 0,
+                totalPrice: total * 1.1
             });
             // Adapt backend response to Order interface if needed
             // Backend returns _id, frontend uses id
@@ -531,7 +535,9 @@ function StoreProvider({ children }) {
                         price: i.price,
                         selectedSize: i.size
                     })),
-                total: data.totalPrice,
+                total: Number(data.totalPrice) || 0,
+                taxPrice: Number(data.taxPrice) || 0,
+                shippingPrice: Number(data.shippingPrice) || 0,
                 deliveryDetails,
                 orderStatus: "Placed",
                 deliveryStatus: "In Process",
@@ -934,7 +940,7 @@ function StoreProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/store-context.tsx",
-        lineNumber: 748,
+        lineNumber: 756,
         columnNumber: 5
     }, this);
 }
