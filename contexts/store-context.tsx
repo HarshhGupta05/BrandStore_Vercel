@@ -57,6 +57,8 @@ export interface Order {
   id: string
   userId: string
   items: OrderItem[]
+  taxPrice: number
+  shippingPrice: number
   total: number
   deliveryDetails: DeliveryDetails
   orderStatus: "Placed" | "In Process" | "Shipped" | "Delivered" | "Cancelled"
@@ -244,7 +246,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             price: item.price,
             selectedSize: item.size
           })),
-          total: order.totalPrice,
+          total: Number(order.totalPrice) || 0,
+          taxPrice: Number(order.taxPrice) || 0,
+          shippingPrice: Number(order.shippingPrice) || 0,
           deliveryDetails: {
             name: order.shippingAddress?.name || order.user?.name || "Unknown User",
             phone: order.shippingAddress?.phone || "Not provided",
@@ -396,7 +400,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           country: deliveryDetails.country
         },
         paymentMethod: deliveryDetails.paymentMethod,
-        totalPrice: total
+        taxPrice: total * 0.1,
+        shippingPrice: 0,
+        totalPrice: total * 1.1
       })
 
       // Adapt backend response to Order interface if needed
@@ -412,7 +418,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           price: i.price,
           selectedSize: i.size
         })),
-        total: data.totalPrice,
+        total: Number(data.totalPrice) || 0,
+        taxPrice: Number(data.taxPrice) || 0,
+        shippingPrice: Number(data.shippingPrice) || 0,
         deliveryDetails,
         orderStatus: "Placed",
         deliveryStatus: "In Process", // Backend default

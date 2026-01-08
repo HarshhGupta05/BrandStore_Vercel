@@ -274,10 +274,22 @@ export default function OrdersPage() {
                     )
                   )}
 
-                  {/* Total */}
-                  <div className="flex justify-between border-t pt-4 text-lg font-bold">
-                    <span>Total:</span>
-                    <span>₹{order.total.toFixed(2)}</span>
+                  {/* Price Breakdown */}
+                  <div className="space-y-1 border-t pt-4 text-sm">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Subtotal:</span>
+                      <span>₹{((Number(order.total) || 0) - (Number(order.taxPrice) || 0)).toFixed(2)}</span>
+                    </div>
+                    {(Number(order.taxPrice) || 0) > 0 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Tax (10%):</span>
+                        <span>₹{(Number(order.taxPrice) || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between pt-1 text-lg font-bold">
+                      <span>Total:</span>
+                      <span>₹{(Number(order.total) || 0).toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
