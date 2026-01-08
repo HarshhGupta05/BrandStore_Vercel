@@ -105,6 +105,19 @@ export interface ManufacturerOrder {
   expectedArrival: string
   status: "Ordered" | "In Transit" | "Partially Received" | "Received" | "Cancelled"
   totalCost: number
+  vendor: Vendor
+}
+
+export interface Vendor {
+  _id: string
+  name: string
+  contactPerson?: string
+  email?: string
+  phone: string
+  address: string
+  city?: string
+  postalCode?: string
+  country?: string
 }
 
 export interface VendorInvoice {
@@ -166,6 +179,9 @@ interface StoreContextType {
   submitReview: (productId: string, rating: number, comment: string) => Promise<void>
   addAddress: (address: Address) => Promise<void>
   isLoading: boolean
+  vendors: Vendor[]
+  createVendor: (vendorData: Partial<Vendor>) => Promise<void>
+  fetchVendors: () => Promise<void>
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
@@ -181,6 +197,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [deliveryLogs, setDeliveryLogs] = useState<DeliveryLog[]>([])
   const [manufacturerOrders, setManufacturerOrders] = useState<ManufacturerOrder[]>([])
   const [vendorInvoices, setVendorInvoices] = useState<VendorInvoice[]>([])
+  const [vendors, setVendors] = useState<Vendor[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -322,7 +339,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           orderDate: order.orderDate,
           expectedArrival: order.expectedArrival,
           status: order.status,
-          totalCost: order.totalCost
+          totalCost: order.totalCost,
+          vendor: order.vendor
         }))
         setManufacturerOrders(mappedOrders)
       } catch (error) {
@@ -644,7 +662,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         orderDate: data.orderDate,
         expectedArrival: data.expectedArrival,
         status: data.status,
-        totalCost: data.totalCost
+        totalCost: data.totalCost,
+        vendor: data.vendor
       }
       setManufacturerOrders((prev) => [newOrder, ...prev])
     } catch (error) {
@@ -813,10 +832,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const fetchVendors = async () => {
+    try {
+      const { data } = await api.get('/vendors')
+      setVendors(data)
+    } catch (error) {
+      console.error("Failed to fetch vendors", error)
+    }
+  }
+
+  const createVendor = async (vendorData: Partial<Vendor>) => {
+    try {
+      const { data } = await api.post('/vendors', vendorData)
+      setVendors(prev => [data, ...prev])
+    } catch (error) {
+      console.error("Failed to create vendor", error)
+      throw error
+    }
+  }
+
+  // Effect to load vendors on mount (or admin load)
+  useEffect(() => {
+    if (isAdmin) {
+      fetchVendors()
+    }
+  }, [isAdmin])
+
   return (
     <StoreContext.Provider
       value={{
-        // ... existing values
         cart,
         addToCart,
         removeFromCart,
@@ -841,8 +885,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         deliveryLogs,
         manufacturerOrders,
         createManufacturerOrder,
-        receiveManufacturerOrderItems, // Expose new method
-        updateManufacturerOrderStatus, // Expose new method
+        receiveManufacturerOrderItems,
+        updateManufacturerOrderStatus,
         deleteManufacturerOrder,
         categories,
         addCategory,
@@ -855,13 +899,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         fetchOrders,
         submitReview,
         addAddress,
-        isLoading
+        isLoading,
+        vendors,
+        createVendor,
+        fetchVendors
       }}
     >
       {children}
     </StoreContext.Provider>
   )
 }
+
 
 
 export function useStore() {

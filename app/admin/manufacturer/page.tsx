@@ -14,7 +14,7 @@ import { Factory, Plus, Trash2, PackageCheck, Eye, X } from "lucide-react"
 import type { ManufacturerOrder } from "@/contexts/store-context"
 
 export default function AdminManufacturerPage() {
-  const { products, manufacturerOrders, createManufacturerOrder, receiveManufacturerOrderItems, deleteManufacturerOrder } =
+  const { products, manufacturerOrders, createManufacturerOrder, receiveManufacturerOrderItems, deleteManufacturerOrder, vendors, createVendor } =
     useStore()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
@@ -27,11 +27,29 @@ export default function AdminManufacturerPage() {
 
 
   // Create Form State
+  const [vendorId, setVendorId] = useState("")
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split("T")[0])
   const [expectedArrival, setExpectedArrival] = useState("")
   const [orderItems, setOrderItems] = useState<{ productId: string; quantity: string; cost: string }[]>([
     { productId: "", quantity: "", cost: "" }
   ])
+
+  // Create Vendor State
+  const [isVendorDiffOpen, setIsVendorDiffOpen] = useState(false)
+  const [newVendor, setNewVendor] = useState({ name: "", phone: "", address: "", email: "", contactPerson: "" })
+
+  const handleCreateVendor = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await createVendor(newVendor)
+      setNewVendor({ name: "", phone: "", address: "", email: "", contactPerson: "" })
+      setIsVendorDiffOpen(false)
+    } catch (err: any) {
+      console.error(err)
+      const errorMessage = err.response?.data?.message || err.message || "Failed to create vendor"
+      alert(`Error: ${errorMessage}`)
+    }
+  }
 
   // --- Create Order Logic ---
 
@@ -74,6 +92,7 @@ export default function AdminManufacturerPage() {
     })
 
     await createManufacturerOrder({
+      vendorId,
       items: payloadItems,
       orderDate: orderDate,
       expectedArrival: expectedArrival,
@@ -81,6 +100,7 @@ export default function AdminManufacturerPage() {
     })
 
     // Reset Form
+    setVendorId("")
     setOrderDate(new Date().toISOString().split("T")[0])
     setExpectedArrival("")
     setOrderItems([{ productId: "", quantity: "", cost: "" }])
@@ -183,6 +203,60 @@ export default function AdminManufacturerPage() {
                     onChange={(e) => setOrderDate(e.target.value)}
                   />
                 </div>
+
+                <div>
+                  <Label htmlFor="vendor">Vendor</Label>
+                  <div className="flex gap-2">
+                    <Select value={vendorId} onValueChange={setVendorId}>
+                      <SelectTrigger id="vendor">
+                        <SelectValue placeholder="Select Vendor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vendors.map((v) => (
+                          <SelectItem key={v._id} value={v._id}>{v.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Dialog open={isVendorDiffOpen} onOpenChange={setIsVendorDiffOpen}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="icon">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add New Vendor</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleCreateVendor} className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label>Vendor Name *</Label>
+                            <Input required value={newVendor.name} onChange={e => setNewVendor({ ...newVendor, name: e.target.value })} placeholder="Acme Corp" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Phone *</Label>
+                            <Input required value={newVendor.phone} onChange={e => setNewVendor({ ...newVendor, phone: e.target.value })} placeholder="+91..." />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Address *</Label>
+                            <Input required value={newVendor.address} onChange={e => setNewVendor({ ...newVendor, address: e.target.value })} placeholder="Address" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input type="email" value={newVendor.email} onChange={e => setNewVendor({ ...newVendor, email: e.target.value })} placeholder="Email (Optional)" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Contact Person</Label>
+                            <Input value={newVendor.contactPerson} onChange={e => setNewVendor({ ...newVendor, contactPerson: e.target.value })} placeholder="Name (Optional)" />
+                          </div>
+                          <Button type="submit" className="w-full">Save Vendor</Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="expectedArrival">Expected Arrival</Label>
                   <Input
@@ -281,73 +355,77 @@ export default function AdminManufacturerPage() {
         </Dialog>
       </div>
 
-      {manufacturerOrders.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Factory className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-            <h2 className="mb-2 text-xl font-semibold">No orders found</h2>
-            <p className="text-muted-foreground">Get started by creating a new manufacturer order.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Factory className="h-5 w-5" />
-              All Orders ({manufacturerOrders.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Order Date</TableHead>
-                    <TableHead className="text-center">Items</TableHead>
-                    <TableHead className="text-right">Total Cost</TableHead>
-                    <TableHead>Expected</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {manufacturerOrders.map((order) => (
-                    <TableRow key={order.orderId}>
-                      <TableCell className="font-medium">{order.orderId}</TableCell>
-                      <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-secondary text-xs">
-                          {order.items.length} Products
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">₹{order.totalCost.toFixed(2)}</TableCell>
-                      <TableCell>{new Date(order.expectedArrival).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor(order.status)}>
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
-                            onClick={() => openReceiveModal(order)}
-                          >
-                            <PackageCheck className="h-4 w-4 mr-1" /> Manage
-                          </Button>
-                        </div>
-                      </TableCell>
+      {
+        manufacturerOrders.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Factory className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+              <h2 className="mb-2 text-xl font-semibold">No orders found</h2>
+              <p className="text-muted-foreground">Get started by creating a new manufacturer order.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Factory className="h-5 w-5" />
+                All Orders ({manufacturerOrders.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>Order Date</TableHead>
+                      <TableHead className="text-center">Items</TableHead>
+                      <TableHead className="text-right">Total Cost</TableHead>
+                      <TableHead>Expected</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  </TableHeader>
+                  <TableBody>
+                    {manufacturerOrders.map((order) => (
+                      <TableRow key={order.orderId}>
+                        <TableCell className="font-medium">{order.orderId}</TableCell>
+                        <TableCell>{order.vendor?.name || "Unknown"}</TableCell>
+                        <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full bg-secondary text-xs">
+                            {order.items.length} Products
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">₹{order.totalCost.toFixed(2)}</TableCell>
+                        <TableCell>{new Date(order.expectedArrival).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
+                              onClick={() => openReceiveModal(order)}
+                            >
+                              <PackageCheck className="h-4 w-4 mr-1" /> Manage
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      }
 
       {/* Receive / Manage Items Modal */}
       <Dialog open={isReceiveOpen} onOpenChange={setIsReceiveOpen}>
@@ -591,6 +669,6 @@ export default function AdminManufacturerPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   )
 }

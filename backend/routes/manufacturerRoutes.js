@@ -8,7 +8,7 @@ const Product = require('../models/Product');
 // @access  Private/Admin
 router.post('/', async (req, res) => {
     try {
-        const { items, orderDate, expectedArrival, status } = req.body;
+        const { items, orderDate, expectedArrival, status, vendorId } = req.body;
 
         // Calculate total cost
         const totalCost = items.reduce((sum, item) => sum + (item.quantity * item.cost), 0);
@@ -17,6 +17,7 @@ router.post('/', async (req, res) => {
 
         const order = new ManufacturerOrder({
             orderId,
+            vendor: vendorId,
             items,
             orderDate,
             expectedArrival,
@@ -37,7 +38,7 @@ router.post('/', async (req, res) => {
 // @access  Private/Admin
 router.get('/', async (req, res) => {
     try {
-        const orders = await ManufacturerOrder.find({}).sort({ createdAt: -1 });
+        const orders = await ManufacturerOrder.find({}).populate('vendor').sort({ createdAt: -1 });
         res.json(orders);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -129,10 +130,15 @@ router.put('/:id/receive', async (req, res) => {
         // Generate Vendor Invoice if items were received
         if (invoiceItems.length > 0) {
             const invoiceId = `INV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+            // Fetch order again with populate to get vendor name
+            const orderWithVendor = await ManufacturerOrder.findOne({ orderId: order.orderId }).populate('vendor');
+            const vendorName = orderWithVendor?.vendor?.name || "Unknown Vendor";
+
             const newInvoice = new VendorInvoice({
                 invoiceId,
                 manufacturerOrderId: order.orderId,
-                vendorName: "Unknown Vendor", // In a real app, strict vendor linkage exists
+                vendorName: vendorName,
                 items: invoiceItems,
                 totalAmount: invoiceTotal,
                 invoiceDate: receivingBatchDate,

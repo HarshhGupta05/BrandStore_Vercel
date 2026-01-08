@@ -22,6 +22,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/manufacturer-orders', require('./routes/manufacturerRoutes'));
 app.use('/api/vendor-invoices', require('./routes/vendorInvoiceRoutes'));
+app.use('/api/vendors', require('./routes/vendorRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
 app.get('/', (req, res) => {

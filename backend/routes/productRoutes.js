@@ -179,6 +179,8 @@ router.get('/', async (req, res) => {
     }
 });
 
+const ManufacturerOrder = require('../models/ManufacturerOrder');
+
 // @desc    Fetch single product
 // @route   GET /api/products/:id
 // @access  Public
@@ -187,11 +189,27 @@ router.get('/:id', async (req, res) => {
         const product = await Product.findOne({ id: req.params.id }) || await Product.findById(req.params.id).catch(e => null);
 
         if (product) {
-            res.json(product);
+            // Convert to object to allow modification
+            const productObj = product.toObject();
+
+            // Find latest manufacturer order for this product
+            // We search by productId (custom ID string) stored in order items
+            const latestOrder = await ManufacturerOrder.findOne({
+                'items.productId': product.id
+            })
+                .sort({ createdAt: -1 })
+                .populate('vendor');
+
+            if (latestOrder && latestOrder.vendor) {
+                productObj.manufacturer = latestOrder.vendor.name;
+            }
+
+            res.json(productObj);
         } else {
             res.status(404).json({ message: 'Product not found' });
         }
     } catch (error) {
+        console.error("Error fetching product:", error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
