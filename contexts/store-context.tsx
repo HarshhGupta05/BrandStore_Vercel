@@ -132,6 +132,10 @@ export interface VendorInvoice {
     costPerUnit: number
     total: number
   }[]
+  subTotal: number
+  discount: number
+  cgst: number
+  sgst: number
   totalAmount: number
   invoiceDate: string
   status: "Pending" | "Paid"
@@ -179,8 +183,8 @@ interface StoreContextType {
   updateOrderDeliveryStatus: (orderId: string, status: Order["deliveryStatus"], deliveryAgent?: string) => void
   deliveryLogs: DeliveryLog[]
   manufacturerOrders: ManufacturerOrder[]
-  createManufacturerOrder: (items: any[], expectedDate: string, vendorName: string) => Promise<void>
-  receiveManufacturerOrderItems: (orderId: string, items: { productId: string, receivedQuantity: number, receivedDate?: string }[]) => Promise<void>
+  createManufacturerOrder: (orderData: any) => Promise<void>
+  receiveManufacturerOrderItems: (orderId: string, items: { productId: string, receivedQuantity: number, receivedDate?: string }[], discount?: number, cgst?: number, sgst?: number) => Promise<void>
   updateManufacturerOrderStatus: (orderId: string, status: string) => Promise<void>
   deleteManufacturerOrder: (orderId: string) => Promise<void>
   categories: { id: string, name: string, description?: string }[]
@@ -692,9 +696,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const receiveManufacturerOrderItems = async (orderId: string, items: { productId: string, receivedQuantity: number, receivedDate?: string }[]) => {
+  const receiveManufacturerOrderItems = async (orderId: string, items: { productId: string, receivedQuantity: number, receivedDate?: string }[], discount?: number, cgst?: number, sgst?: number) => {
     try {
-      const { data } = await api.put(`/manufacturer-orders/${orderId}/receive`, { receivedItems: items })
+      const { data } = await api.put(`/manufacturer-orders/${orderId}/receive`, {
+        receivedItems: items,
+        discount,
+        cgst,
+        sgst
+      })
 
       // Update local state
       setManufacturerOrders((prev) => prev.map(order =>
